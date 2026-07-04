@@ -18,6 +18,7 @@ import re
 from app.models import ClothingItem
 from app.schemas import RecommendationOut
 from app.services import ai_client, recommendation_service
+from app.services.tag_constants import ALL_TAG_FIELDS
 from app.services.tagging_service import VALID_CATEGORIES
 
 
@@ -36,9 +37,11 @@ _SLOT_FOR_CATEGORY: dict[str, str] = {
 _SYSTEM_PROMPT = (
     "你是穿搭师。只能从用户给出的衣柜单品 ID 中挑选，"
     "上衣(top)、下装(bottom)、鞋子(shoes)各选一件。"
+    "搭配时综合考虑：color_tone 色系协调、style 风格一致、"
+    "season 季节合适、formality 正式度对齐、品类连贯。"
     "必须只返回一个 JSON 对象，不要任何解释或多余文本，格式为："
     '{"top_id": int, "bottom_id": int, "shoes_id": int, "reason": str}。'
-    "reason 用一句中文说明搭配理由。"
+    "reason 用一句中文说明搭配理由，可引用上述标签。"
 )
 
 
@@ -54,7 +57,7 @@ def recommend_with_ai(items: list[ClothingItem], text: str) -> RecommendationOut
     if missing:
         raise recommendation_service.MissingCategoryError(missing)
 
-    # 2. 构造 user prompt：用户需求 + 衣柜清单
+    # 2. 构造 user prompt：用户需求 + 衣柜清单（每件渲染全部非空标签）
     by_cat: dict[str, list[ClothingItem]] = {c: [] for c in VALID_CATEGORIES}
     for it in items:
         if it.category in by_cat:
@@ -63,11 +66,7 @@ def recommend_with_ai(items: list[ClothingItem], text: str) -> RecommendationOut
     lines = [f"用户需求：{text or '随便搭一套'}", "衣柜单品："]
     for cat in VALID_CATEGORIES:
         for it in by_cat[cat]:
-            color = it.color or "未标注"
-            style = it.style or "未标注"
-            lines.append(
-                f"- id={it.id} category={cat} name={it.name} color={color} style={style}"
-            )
+            lines.append(_render_item(it))
     user_prompt = "\n".join(lines)
 
     messages = [
@@ -115,6 +114,24 @@ def recommend_with_ai(items: list[ClothingItem], text: str) -> RecommendationOut
         shoes_id=data["shoes_id"],
         reason=reason.strip(),
     )
+
+
+def _render_item(item: ClothingItem) -> str:
+    """把一件单品渲染为一行标签富文本，供模型判断搭配。
+
+    输出示例：
+    ``- id=1 category=top name=白色T恤 subtype=T恤 color_base=白色 color_tone=浅色系 pattern=纯色 style=休闲 fit=常规 season=春秋,夏季 formality=日常 material=棉 sleeve_length=短袖 top_length=常规 neckline=圆领``
+    """
+    parts = [
+        f"id={item.id}",
+        f"category={item.category}",
+        f"name={item.name}",
+    ]
+    for field in ALL_TAG_FIELDS:
+        val = getattr(item, field, None)
+        if val is not None:
+            parts.append(f"{field}={val}")
+    return "- " + " ".join(parts)
 
 
 def _parse_json(raw: str) -> object:

@@ -1,4 +1,4 @@
-"""推荐接口测试。FRD-API-004 / FRD-ST-005。
+"""推荐接口测试。FRD v4 / API-004 / ST-005。
 
 默认 provider=openai_compatible，本文件用 monkeypatch 临时切到 rule，
 验证规则路径：三品类齐全 → 200 + 四键；缺品类 → 422 顶层三字段；
@@ -25,9 +25,18 @@ def _force_rule_provider(monkeypatch):
 
 
 def test_recommend_success(client, upload_item):
-    a = upload_item("top", color="白色", style="休闲").json()
-    b = upload_item("bottom", color="黑色", style="通勤").json()
-    c = upload_item("shoes", color="蓝色", style="休闲").json()
+    a = upload_item("top", ai_tags={
+        "category": "top", "color_base": "白色", "color_tone": "浅色系",
+        "style": "休闲", "season": "春秋", "formality": "日常",
+    }).json()
+    b = upload_item("bottom", ai_tags={
+        "category": "bottom", "color_base": "黑色", "style": "通勤",
+        "season": "春秋", "formality": "通勤",
+    }).json()
+    c = upload_item("shoes", ai_tags={
+        "category": "shoes", "color_base": "蓝色", "style": "休闲",
+        "season": "春秋", "formality": "日常",
+    }).json()
 
     r = client.post(
         "/api/recommendations/outfit", json={"text": "今天想去公园，舒服一点"}
@@ -51,7 +60,6 @@ def test_recommend_missing_category(client, upload_item):
     )
     assert r.status_code == 422
     body = r.json()
-    # 顶层字段，不是 detail 包裹
     assert body["error"] == "missing_category"
     assert "message" in body and body["message"]
     assert body["missing_categories"] == ["shoes"]
@@ -67,33 +75,49 @@ def test_recommend_missing_two_categories(client, upload_item):
 
 # ---------------- 服务层单测（不经 HTTP） ----------------
 
-def test_recommend_service_deterministic():
-    """recommend 是纯函数，seed 固定下结果可复现。"""
+def _make_items():
+    """构造三品类各一件的 ClothingItem 列表（带新标签字段）。"""
     ts = datetime(2026, 7, 1, 10, 0, 0)
-    items = [
-        ClothingItem(id=1, name="白色上衣", category="top", color="白色", style="休闲",
+    return [
+        ClothingItem(id=1, name="白色上衣", category="top",
+                     subtype="T恤", color_base="白色", color_tone="浅色系",
+                     pattern="纯色", style="休闲", fit="常规", season="春秋",
+                     formality="日常", material="棉",
+                     sleeve_length="短袖", top_length="常规", neckline="圆领",
                      original_image="a", processed_image="b", created_at=ts),
-        ClothingItem(id=2, name="黑色下装", category="bottom", color="黑色", style="通勤",
+        ClothingItem(id=2, name="黑色下装", category="bottom",
+                     subtype="牛仔裤", color_base="黑色", color_tone="深色系",
+                     pattern="纯色", style="通勤", fit="常规", season="春秋",
+                     formality="通勤", material="牛仔",
+                     pants_length="长裤", waist="中腰", pants_shape="直筒",
                      original_image="a", processed_image="b", created_at=ts),
-        ClothingItem(id=3, name="蓝色鞋子", category="shoes", color="蓝色", style="休闲",
+        ClothingItem(id=3, name="蓝色鞋子", category="shoes",
+                     subtype="运动鞋", color_base="蓝色", color_tone="亮色系",
+                     pattern="纯色", style="休闲", fit="常规", season="春秋",
+                     formality="日常", material="网面",
+                     shoe_cut="低帮", shoe_type="运动鞋", sole="运动缓震", closure="系带",
                      original_image="a", processed_image="b", created_at=ts),
     ]
+
+
+def test_recommend_service_deterministic():
+    """recommend 是纯函数，seed 固定下结果可复现。"""
+    items = _make_items()
     out = recommendation_service.recommend(items, "今天想去公园，舒服一点", seed=0)
-    # 休闲风格命中 top(shoes 也休闲)，颜色"白"命中 top
+    # 休闲风格命中 top 与 shoes，bottom 也唯一
     assert out.top_id == 1
     assert out.bottom_id == 2
     assert out.shoes_id == 3
-    # reason 含场景或风格词
-    assert ("休闲" in out.reason) or ("公园" in out.reason)
+    assert ("休闲" in out.reason) or ("休闲" in out.reason)
 
-    # 同输入同 seed → 同输出
     out2 = recommendation_service.recommend(items, "今天想去公园，舒服一点", seed=0)
     assert out2 == out
 
 
 def test_recommend_service_missing_raises():
     items = [
-        ClothingItem(id=1, name="上衣", category="top", color="白色", style="休闲",
+        ClothingItem(id=1, name="上衣", category="top", color_base="白色",
+                     style="休闲", season="春秋", formality="日常",
                      original_image="a", processed_image="b", created_at=datetime(2026, 7, 1)),
     ]
     with pytest.raises(recommendation_service.MissingCategoryError) as exc:

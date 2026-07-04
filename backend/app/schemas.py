@@ -16,28 +16,69 @@ from pydantic import BaseModel, ConfigDict, field_serializer
 
 
 class TagOutput(BaseModel):
-    """tagging_service 返回的归一化标签。"""
+    """tagging_service 返回的归一化标签（v4 扩展标签体系）。
+
+    通用 + 品类专属字段；单选未确定存 "unknown"，多选逗号分隔，
+    非该品类专属字段为 None。详见 services/tag_constants.py。
+    """
 
     category: str
-    color: str | None = None
+    subtype: str | None = None
+    color_base: str | None = None
+    color_tone: str | None = None
+    pattern: str | None = None
     style: str | None = None
+    fit: str | None = None
+    season: str | None = None
+    formality: str | None = None
+    material: str | None = None
+    # 上衣专属
+    sleeve_length: str | None = None
+    top_length: str | None = None
+    neckline: str | None = None
+    # 下装专属
+    pants_length: str | None = None
+    waist: str | None = None
+    pants_shape: str | None = None
+    # 鞋子专属
+    shoe_cut: str | None = None
+    shoe_type: str | None = None
+    sole: str | None = None
+    closure: str | None = None
 
 
 class ClothingItemOut(BaseModel):
-    """单品完整响应（upload 与详情）。"""
+    """单品完整响应（upload 与详情）。含全部标签字段。"""
 
     model_config = ConfigDict(from_attributes=True)
 
     id: int
     name: str
     category: str
-    color: str | None = None
+    subtype: str | None = None
+    color_base: str | None = None
+    color_tone: str | None = None
+    pattern: str | None = None
     style: str | None = None
+    fit: str | None = None
+    season: str | None = None
+    formality: str | None = None
+    material: str | None = None
+    sleeve_length: str | None = None
+    top_length: str | None = None
+    neckline: str | None = None
+    pants_length: str | None = None
+    waist: str | None = None
+    pants_shape: str | None = None
+    shoe_cut: str | None = None
+    shoe_type: str | None = None
+    sole: str | None = None
+    closure: str | None = None
     original_image: str
     processed_image: str
     created_at: datetime
-    # 标签来源提示（仅上传响应里赋值，ORM 无此列，GET 详情时为 None）：
-    # manual=用户全填未调 AI / ai=AI 参与并成功 / ai_failed=AI 失败降级到规则
+    # 标签来源提示（仅上传/auto-tag 响应里赋值，ORM 无此列，GET 详情时为 None）：
+    # ai=AI 识图成功 / ai_failed=AI 失败降级（category 默认、其余 unknown）
     tagging_status: str | None = None
 
     @field_serializer("created_at")
@@ -46,15 +87,21 @@ class ClothingItemOut(BaseModel):
 
 
 class ClothingItemList(BaseModel):
-    """列表项：仅含展示所需字段（省略 original_image 与 created_at）。"""
+    """列表项：仅含卡片展示所需字段（省略 material、品类专属字段、原图与时间）。"""
 
     model_config = ConfigDict(from_attributes=True)
 
     id: int
     name: str
     category: str
-    color: str | None = None
+    subtype: str | None = None
+    color_base: str | None = None
+    color_tone: str | None = None
+    pattern: str | None = None
     style: str | None = None
+    fit: str | None = None
+    season: str | None = None
+    formality: str | None = None
     processed_image: str
 
 

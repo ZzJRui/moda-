@@ -28,14 +28,26 @@ from app.services import ai_client, ai_recommendation_service, recommendation_se
 
 
 def _make_items():
-    """构造三品类各一件的 ClothingItem 列表（id 1/2/3）。"""
+    """构造三品类各一件的 ClothingItem 列表（带新标签字段，id 1/2/3）。"""
     ts = datetime(2026, 7, 1, 10, 0, 0)
     return [
-        ClothingItem(id=1, name="白色上衣", category="top", color="白色", style="休闲",
+        ClothingItem(id=1, name="白色上衣", category="top",
+                     subtype="T恤", color_base="白色", color_tone="浅色系",
+                     pattern="纯色", style="休闲", fit="常规", season="春秋",
+                     formality="日常", material="棉",
+                     sleeve_length="短袖", top_length="常规", neckline="圆领",
                      original_image="a", processed_image="b", created_at=ts),
-        ClothingItem(id=2, name="黑色下装", category="bottom", color="黑色", style="通勤",
+        ClothingItem(id=2, name="黑色下装", category="bottom",
+                     subtype="牛仔裤", color_base="黑色", color_tone="深色系",
+                     pattern="纯色", style="通勤", fit="常规", season="春秋",
+                     formality="通勤", material="牛仔",
+                     pants_length="长裤", waist="中腰", pants_shape="直筒",
                      original_image="a", processed_image="b", created_at=ts),
-        ClothingItem(id=3, name="蓝色鞋子", category="shoes", color="蓝色", style="休闲",
+        ClothingItem(id=3, name="蓝色鞋子", category="shoes",
+                     subtype="运动鞋", color_base="蓝色", color_tone="亮色系",
+                     pattern="纯色", style="休闲", fit="常规", season="春秋",
+                     formality="日常", material="网面",
+                     shoe_cut="低帮", shoe_type="运动鞋", sole="运动缓震", closure="系带",
                      original_image="a", processed_image="b", created_at=ts),
     ]
 
@@ -169,9 +181,15 @@ def test_ai_missing_category_skips_model(client, upload_item, monkeypatch):
 def test_ai_provider_rule_uses_rule(client, upload_item, monkeypatch):
     """provider=rule 时走规则路径，不调 AI。"""
     monkeypatch.setattr(config, "AI_RECOMMENDATION_PROVIDER", "rule")
-    a = upload_item("top", color="白色", style="休闲").json()
-    b = upload_item("bottom", color="黑色", style="通勤").json()
-    c = upload_item("shoes", color="蓝色", style="休闲").json()
+    a = upload_item("top", ai_tags={
+        "category": "top", "color_base": "白色", "style": "休闲",
+    }).json()
+    b = upload_item("bottom", ai_tags={
+        "category": "bottom", "color_base": "黑色", "style": "通勤",
+    }).json()
+    c = upload_item("shoes", ai_tags={
+        "category": "shoes", "color_base": "蓝色", "style": "休闲",
+    }).json()
     calls: list = []
     _stub_chat(monkeypatch, "should-not-be-called", calls=calls)
 
@@ -253,4 +271,7 @@ def test_ai_service_prompt_contains_items(monkeypatch):
     assert "id=1" in user_msg and "category=top" in user_msg
     assert "id=2" in user_msg and "category=bottom" in user_msg
     assert "id=3" in user_msg and "category=shoes" in user_msg
+    # 新标签字段渲染
+    assert "color_base=白色" in user_msg
+    assert "style=休闲" in user_msg
     assert "去公园" in user_msg

@@ -68,7 +68,7 @@ frontend/
 
 ## 3. Phase 0：项目确认
 
-- [ ] 确认使用技术栈：React + Vite + TypeScript + Tailwind CSS + FastAPI + SQLite。
+- [ ] 确认使用技术栈：React 18 + TypeScript + Vite + antd-mobile v5 + framer-motion + react-router-dom + FastAPI + SQLite（截图用 `html2canvas`）。
 - [ ] 确认第一版不做登录注册。
 - [ ] 确认第一版图片存储在本地 `uploads/`。
 - [ ] 确认第一版 AI 使用 mock / 规则。
@@ -317,9 +317,10 @@ GET /health
 ### 9.1 初始化前端
 
 - [ ] 创建 `frontend/`。
-- [ ] 初始化 React + Vite + TypeScript。
-- [ ] 配置 Tailwind CSS。
-- [ ] 配置路由。
+- [ ] 初始化 React 18 + Vite + TypeScript。
+- [ ] 引入 antd-mobile v5。
+- [ ] 引入 framer-motion。
+- [ ] 配置 react-router-dom。
 - [ ] 创建 API client。
 - [ ] 配置后端 API base URL。
 

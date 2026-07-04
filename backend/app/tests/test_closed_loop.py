@@ -29,15 +29,24 @@ def _png_bytes() -> bytes:
 
 def test_closed_loop(client, upload_item):
     # 1. 上传上衣
-    top = upload_item("top", color="白色", style="休闲").json()
+    top = upload_item("top", ai_tags={
+        "category": "top", "color_base": "白色", "style": "休闲",
+        "season": "春秋", "formality": "日常",
+    }).json()
     assert top["category"] == "top"
 
     # 2. 上传下装
-    bottom = upload_item("bottom", color="黑色", style="通勤").json()
+    bottom = upload_item("bottom", ai_tags={
+        "category": "bottom", "color_base": "黑色", "style": "通勤",
+        "season": "春秋", "formality": "通勤",
+    }).json()
     assert bottom["category"] == "bottom"
 
     # 3. 上传鞋子
-    shoes = upload_item("shoes", color="蓝色", style="休闲").json()
+    shoes = upload_item("shoes", ai_tags={
+        "category": "shoes", "color_base": "蓝色", "style": "休闲",
+        "season": "春秋", "formality": "日常",
+    }).json()
     assert shoes["category"] == "shoes"
 
     # 4. 搜索衣柜（按品类能搜到上衣）

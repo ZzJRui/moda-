@@ -1,7 +1,7 @@
-"""单品路由。FRD-API-002 / FRD-API-003 + 详情/删除 + AI 重打标签。
+"""单品路由。FRD v4 / API-002 / API-003 + 详情/删除 + AI 重打标签。
 
-- POST   /api/clothes/upload           上传单品（可选 AI 识图补缺标签）
-- GET    /api/clothes                  衣柜列表与搜索
+- POST   /api/clothes/upload           上传单品（纯 AI 识图打标签，用户不手填）
+- GET    /api/clothes                  衣柜列表与搜索（按新标签字段筛选）
 - GET    /api/clothes/{id}             单品详情
 - DELETE /api/clothes/{id}             删除单品
 - POST   /api/clothes/{id}/auto-tag    对已存单品重新 AI 识图打标签
@@ -12,7 +12,7 @@ import mimetypes
 import re
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from fastapi.responses import JSONResponse
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
@@ -28,6 +28,7 @@ from app.services import (
     storage_service,
     tagging_service,
 )
+from app.services.tag_constants import ALL_TAG_FIELDS
 
 router = APIRouter(prefix="/api/clothes", tags=["clothes"])
 
@@ -52,9 +53,6 @@ def _generate_name(original_filename: str) -> str:
 def upload_clothing(
     db: Session = Depends(get_db),
     file: UploadFile = File(...),
-    category: str | None = Form(None),
-    color: str | None = Form(None),
-    style: str | None = Form(None),
 ) -> ClothingItemOut:
     # 1. 校验扩展名 / MIME / 大小
     try:
@@ -75,36 +73,32 @@ def upload_clothing(
         storage_service.delete_files(filename)
         raise HTTPException(status_code=500, detail="图片处理失败")
 
-    # 3. 生成标签：用户全填则走规则；否则 AI 识图补缺，失败降级到规则
-    user_tags = {"category": category, "color": color, "style": style}
-    all_filled = all(v and v.strip() for v in user_tags.values())
+    # 3. 生成标签：纯 AI 识图，不再接收用户手填字段
+    if not config.AI_TAGGING_ENABLED:
+        # 离线/调试：上传需要 AI 识图，未开启则拒绝
+        storage_service.delete_files(filename)
+        return JSONResponse(
+            status_code=503,
+            content={
+                "error": "ai_tagging_disabled",
+                "message": "上传需要开启 AI 识图打标签（AI_TAGGING_ENABLED=true）。",
+            },
+        )
 
-    tagging_status = "manual"
-    if config.AI_TAGGING_ENABLED and not all_filled:
-        try:
-            image_bytes = storage_service.original_fs_path(filename).read_bytes()
-            ai_out = ai_tagging_service.tag_with_ai(image_bytes)
-            # 合并：用户填的字段优先，AI 补缺
-            merged = {
-                "category": user_tags["category"] or ai_out.category,
-                "color": user_tags["color"] or ai_out.color,
-                "style": user_tags["style"] or ai_out.style,
-            }
-            tags = tagging_service.generate_tags(**merged)
-            tagging_status = "ai"
-        except (ai_client.AIClientError, ai_tagging_service.AIInvalidResponseError):
-            # 降级：不阻断上传，走原规则归一化
-            tags = tagging_service.generate_tags(category, color, style)
-            tagging_status = "ai_failed"
-    else:
-        tags = tagging_service.generate_tags(category, color, style)
+    tagging_status = "ai"
+    try:
+        image_bytes = storage_service.original_fs_path(filename).read_bytes()
+        ai_out = ai_tagging_service.tag_with_ai(image_bytes)
+        tags = tagging_service.generate_tags(**ai_out.model_dump())
+    except (ai_client.AIClientError, ai_tagging_service.AIInvalidResponseError):
+        # 降级：不阻断上传，category 默认、其余标签 unknown
+        tags = tagging_service.generate_tags()
+        tagging_status = "ai_failed"
 
     # 4. 写库
     item = ClothingItem(
         name=_generate_name(file.filename or ""),
-        category=tags.category,
-        color=tags.color,
-        style=tags.style,
+        **tags.model_dump(),
         original_image=original_url,
         processed_image=processed_url,
     )
@@ -127,23 +121,40 @@ def list_clothes(
     db: Session = Depends(get_db),
     q: str | None = None,
     category: str | None = None,
-    color: str | None = None,
+    subtype: str | None = None,
+    color_base: str | None = None,
+    color_tone: str | None = None,
+    pattern: str | None = None,
     style: str | None = None,
+    fit: str | None = None,
+    season: str | None = None,
+    formality: str | None = None,
 ) -> list[ClothingItemList]:
     query = db.query(ClothingItem)
     if category:
         query = query.filter(ClothingItem.category == category)
-    if color:
-        query = query.filter(ClothingItem.color == color)
-    if style:
-        query = query.filter(ClothingItem.style == style)
+    # 单选字段精确匹配
+    for field, value in (
+        ("subtype", subtype),
+        ("color_base", color_base),
+        ("color_tone", color_tone),
+        ("pattern", pattern),
+        ("fit", fit),
+        ("formality", formality),
+    ):
+        if value:
+            query = query.filter(getattr(ClothingItem, field) == value)
+    # 多选字段子串匹配（逗号分隔存储）
+    for field, value in (("style", style), ("season", season)):
+        if value:
+            query = query.filter(getattr(ClothingItem, field).ilike(f"%{value}%"))
     if q:
         kw = f"%{q}%"
         query = query.filter(
             or_(
                 ClothingItem.name.ilike(kw),
-                ClothingItem.color.ilike(kw),
-                ClothingItem.style.ilike(kw),
+                ClothingItem.subtype.ilike(kw),
+                ClothingItem.color_base.ilike(kw),
             )
         )
     query = query.order_by(ClothingItem.created_at.desc())
@@ -227,13 +238,11 @@ def auto_tag_clothing(item_id: int, db: Session = Depends(get_db)) -> ClothingIt
             },
         )
 
-    # 归一化后写回
-    tags = tagging_service.generate_tags(
-        ai_out.category, ai_out.color, ai_out.style
-    )
+    # 归一化后写回全部标签字段
+    tags = tagging_service.generate_tags(**ai_out.model_dump())
     item.category = tags.category
-    item.color = tags.color
-    item.style = tags.style
+    for field in ALL_TAG_FIELDS:
+        setattr(item, field, getattr(tags, field))
     db.commit()
     db.refresh(item)
     return ClothingItemOut.model_validate(item).model_copy(
