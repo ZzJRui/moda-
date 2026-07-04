@@ -50,3 +50,37 @@ app.mount(
     StaticFiles(directory=str(config.UPLOAD_DIR)),
     name="uploads",
 )
+
+# 前端 SPA：把 frontend/dist 挂到根路径，供 cpolar 单隧道对外用。
+# 未构建（dist 不存在）时静默跳过，本地开发仍可用 vite dev 5173。
+from pathlib import Path as _P
+from fastapi.responses import FileResponse as _FileResponse
+from starlette.exceptions import HTTPException as _StarletteHTTPException
+
+_FRONTEND_DIST = _P(config.BASE_DIR).parent / "frontend" / "dist"
+if _FRONTEND_DIST.exists():
+    app.mount(
+        "/assets",
+        StaticFiles(directory=str(_FRONTEND_DIST / "assets")),
+        name="frontend-assets",
+    )
+
+    _INDEX_HTML = _FRONTEND_DIST / "index.html"
+
+    @app.get("/", include_in_schema=False)
+    async def _spa_root():  # noqa: D401
+        return _FileResponse(_INDEX_HTML)
+
+    # SPA 深链兜底：非 /api、/uploads、/health、/docs、/openapi.json 的 GET 请求返回 index.html，
+    # 让 react-router 接管前端路由。
+    @app.exception_handler(404)
+    async def _spa_fallback(request, exc):  # noqa: D401
+        path = request.url.path
+        if request.method == "GET" and not path.startswith(
+            ("/api", "/uploads", "/health", "/docs", "/openapi", "/redoc")
+        ):
+            return _FileResponse(_INDEX_HTML)
+        # 保留 FastAPI 默认 JSON 404
+        from fastapi.responses import JSONResponse as _JSONResponse
+        detail = exc.detail if isinstance(exc, _StarletteHTTPException) else "Not Found"
+        return _JSONResponse({"detail": detail}, status_code=404)

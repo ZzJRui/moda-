@@ -22,3 +22,11 @@ ff540feecea7b8877c68c0e94563b3b7.jpg
 .env
 .env.local
 ai-env.local
+
+# 前端构建产物与本地环境变量
+frontend/node_modules
+frontend/dist
+frontend/.env.local
+
+.playwright-mcp/
+ai-closet-mvp(4)/
