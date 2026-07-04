@@ -1,5 +1,6 @@
 // /api/clothes 相关接口
-import { request } from './client'
+import { request, getApiBaseUrl } from './client'
+import { ApiError, parseApiError } from './errors'
 import type { ClothingItemListDto, ClothingItemOutDto } from './dto'
 import {
   mapClothingItem,
@@ -39,6 +40,58 @@ export async function uploadClothes(file: File): Promise<ClothingItem> {
     form,
   })
   return mapClothingItem(dto)
+}
+
+export function uploadClothesWithProgress(
+  file: File,
+  onProgress: (percent: number) => void,
+  signal?: AbortSignal,
+): Promise<ClothingItem> {
+  return new Promise((resolve, reject) => {
+    const form = new FormData()
+    form.append('file', file)
+
+    const xhr = new XMLHttpRequest()
+    const url = `${getApiBaseUrl()}/api/clothes/upload`
+
+    xhr.open('POST', url)
+
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) {
+        onProgress(Math.round((e.loaded / e.total) * 100))
+      }
+    }
+
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          const dto = JSON.parse(xhr.responseText) as ClothingItemOutDto
+          onProgress(100)
+          resolve(mapClothingItem(dto))
+        } catch {
+          reject(new ApiError({ status: xhr.status, message: '响应解析失败' }))
+        }
+      } else {
+        let body: unknown
+        try { body = JSON.parse(xhr.responseText) } catch { body = xhr.responseText }
+        reject(parseApiError(xhr.status, body))
+      }
+    }
+
+    xhr.onerror = () => {
+      reject(new ApiError({ status: 0, message: '网络异常' }))
+    }
+
+    xhr.onabort = () => {
+      reject(new ApiError({ status: 0, message: '已取消上传' }))
+    }
+
+    if (signal) {
+      signal.addEventListener('abort', () => xhr.abort())
+    }
+
+    xhr.send(form)
+  })
 }
 
 export async function deleteClothes(id: number): Promise<void> {

@@ -33,7 +33,7 @@ export const ClothingCarousel = forwardRef<SwiperRef, ClothingCarouselProps>(
     if (items.length === 0) {
       return (
         <div style={C.slot}>
-          <div style={C.emptySlot}>
+          <div style={{ ...C.emptySlot, height: Math.max(height, 120) }}>
             <span style={C.emptySlotPlus}>+</span>
             <span style={C.emptySlotText}>{'\u6dfb\u52a0'}{categoryLabel}</span>
           </div>
@@ -79,7 +79,7 @@ export const ClothingCarousel = forwardRef<SwiperRef, ClothingCarouselProps>(
 
 const C: Record<string, React.CSSProperties> = {
   slot: {
-    marginBottom: 10,
+    marginBottom: 8,
     touchAction: 'pan-y',
   },
   slotSpinning: {

@@ -3,7 +3,6 @@ import {
   Button,
   Toast,
   SafeArea,
-  Input,
   ErrorBlock,
   SpinLoading,
 } from 'antd-mobile'
@@ -12,12 +11,12 @@ import html2canvas from 'html2canvas'
 import { useNavigate } from 'react-router-dom'
 import type { ClothingCategory, AIRecommendation, ClothingItem } from '../shared/types'
 import { listClothes } from '../../api/clothes'
-import { requestOutfit } from '../../api/recommendations'
 import { createOutfit } from '../../api/outfits'
 import { createFavorite } from '../../api/favorites'
 import { ApiError } from '../../api/errors'
 import { ClothingCarousel } from './ClothingCarousel'
-import { HeroDialog } from './HeroDialog'
+import { StylingChat, CHAT_LAYOUT_ID } from './StylingChat'
+import { motion } from 'framer-motion'
 
 /* -------------------------------------------------- */
 /*  Helpers                                           */
@@ -62,10 +61,7 @@ export function StylingHome() {
   const [recommendation, setRecommendation] = useState<AIRecommendation | null>(null)
   const [lastPrompt, setLastPrompt] = useState<string | null>(null)
   const [isAnimating, setIsAnimating] = useState(false)
-  const [isRequesting, setIsRequesting] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
-  const [chatInput, setChatInput] = useState('')
-  const [missingCategories, setMissingCategories] = useState<ClothingCategory[]>([])
 
   // 真实数据
   const [items, setItems] = useState<ClothingItem[]>([])
@@ -75,8 +71,10 @@ export function StylingHome() {
   const topRef = useRef<SwiperRef>(null)
   const bottomRef = useRef<SwiperRef>(null)
   const shoesRef = useRef<SwiperRef>(null)
+  const scrollAreaRef = useRef<HTMLDivElement>(null)
+  const [cardHeight, setCardHeight] = useState(220)
 
-  // 截图目标：三条老虎机 + reason 卡
+  // 截图目标：三条老虎机
   const captureRef = useRef<HTMLDivElement>(null)
 
   // 当前每条 swiper 停留的 index，用于保存时取当前搭配
@@ -104,55 +102,46 @@ export function StylingHome() {
     void fetchItems()
   }, [fetchItems])
 
-  /* AI Chat send — 调用真实推荐接口 */
-  const handleSendChat = async () => {
-    const text = chatInput.trim()
-    if (!text || isRequesting) return
-
-    setIsRequesting(true)
-    setMissingCategories([])
-
-    try {
-      const rec = await requestOutfit(text)
-
-      setActiveChat(false)
-      setIsAnimating(true)
-      setLastPrompt(text)
-
-      const topIdx = topItems.findIndex((i) => i.id === rec.topId)
-      const bottomIdx = bottomItems.findIndex((i) => i.id === rec.bottomId)
-      const shoesIdx = shoesItems.findIndex((i) => i.id === rec.shoesId)
-
-      setTimeout(() => {
-        topRef.current?.swipeTo(topIdx >= 0 ? topIdx : 0)
-        currentIdx.current.top = topIdx >= 0 ? topIdx : 0
-      }, 200)
-      setTimeout(() => {
-        bottomRef.current?.swipeTo(bottomIdx >= 0 ? bottomIdx : 0)
-        currentIdx.current.bottom = bottomIdx >= 0 ? bottomIdx : 0
-      }, 800)
-      setTimeout(() => {
-        shoesRef.current?.swipeTo(shoesIdx >= 0 ? shoesIdx : 0)
-        currentIdx.current.shoes = shoesIdx >= 0 ? shoesIdx : 0
-        setIsAnimating(false)
-        setRecommendation(rec)
-        setChatInput('')
-      }, 1400)
-    } catch (err) {
-      if (err instanceof ApiError && err.code === 'missing_category') {
-        const missing = (err.missingCategories ?? []).filter((c): c is ClothingCategory =>
-          c === 'top' || c === 'bottom' || c === 'shoes',
-        )
-        setMissingCategories(missing)
-        Toast.show({ content: err.message, position: 'bottom' })
-      } else if (err instanceof ApiError) {
-        Toast.show({ content: err.message, position: 'bottom' })
-      } else {
-        Toast.show({ content: '推荐失败，请稍后再试', position: 'bottom' })
-      }
-    } finally {
-      setIsRequesting(false)
+  // 动态计算卡片高度，使三行卡片填满可视区域
+  useEffect(() => {
+    const el = scrollAreaRef.current
+    if (!el) return
+    const calc = () => {
+      const h = el.clientHeight
+      // captureWrap padding (32 top + 8 bottom) + 2 slot gaps (8px each) = 56
+      const available = h - 32 - 8 - 8 * 2
+      setCardHeight(Math.max(Math.floor(available / 3 * 0.95), 120))
     }
+    calc()
+    const ro = new ResizeObserver(calc)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+
+  /* AI Chat — 收到推荐后触发老虎机动画 */
+  const handleChatRecommend = (rec: AIRecommendation, prompt: string) => {
+    setRecommendation(rec)
+    setLastPrompt(prompt)
+    setActiveChat(false)
+    setIsAnimating(true)
+
+    const topIdx = topItems.findIndex((i) => i.id === rec.topId)
+    const bottomIdx = bottomItems.findIndex((i) => i.id === rec.bottomId)
+    const shoesIdx = shoesItems.findIndex((i) => i.id === rec.shoesId)
+
+    setTimeout(() => {
+      topRef.current?.swipeTo(topIdx >= 0 ? topIdx : 0)
+      currentIdx.current.top = topIdx >= 0 ? topIdx : 0
+    }, 200)
+    setTimeout(() => {
+      bottomRef.current?.swipeTo(bottomIdx >= 0 ? bottomIdx : 0)
+      currentIdx.current.bottom = bottomIdx >= 0 ? bottomIdx : 0
+    }, 800)
+    setTimeout(() => {
+      shoesRef.current?.swipeTo(shoesIdx >= 0 ? shoesIdx : 0)
+      currentIdx.current.shoes = shoesIdx >= 0 ? shoesIdx : 0
+      setIsAnimating(false)
+    }, 1400)
   }
 
   /* Save outfit —  POST /api/outfits → html2canvas → POST /api/favorites */
@@ -288,12 +277,7 @@ export function StylingHome() {
 
       {/* === Header === */}
       <div style={S.header}>
-        <div style={S.headerLeft}>
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="4" y1="6" x2="20" y2="6" /><line x1="4" y1="12" x2="14" y2="12" /><line x1="4" y1="18" x2="18" y2="18" />
-            <circle cx="18" cy="6" r="2" fill="currentColor" /><circle cx="10" cy="12" r="2" fill="currentColor" /><circle cx="14" cy="18" r="2" fill="currentColor" />
-          </svg>
-        </div>
+        <div style={S.headerSpacer} />
         <span style={S.headerTitle}>{'搭配'}</span>
         <div style={S.headerRight}>
           <button
@@ -307,7 +291,7 @@ export function StylingHome() {
       </div>
 
       {/* === Main Content === */}
-      <div style={S.scrollArea} className="styling-scroll">
+      <div ref={scrollAreaRef} style={S.scrollArea} className="styling-scroll">
         {loading ? (
           <div style={S.loadingWrap}>
             <SpinLoading color="primary" />
@@ -325,77 +309,49 @@ export function StylingHome() {
             <ClothingCarousel
               ref={topRef}
               items={topItems}
+              height={cardHeight}
               categoryLabel={categoryLabel.top}
               isSpinning={isAnimating}
             />
             <ClothingCarousel
               ref={bottomRef}
               items={bottomItems}
+              height={cardHeight}
               categoryLabel={categoryLabel.bottom}
               isSpinning={isAnimating}
             />
             <ClothingCarousel
               ref={shoesRef}
               items={shoesItems}
+              height={cardHeight}
               categoryLabel={categoryLabel.shoes}
               isSpinning={isAnimating}
             />
-
-            {/* Recommendation panel */}
-            {recommendation && !isAnimating && (
-              <div style={S.recommendationPanel}>
-                <div style={S.reasonCard}>
-                  <span style={S.reasonIcon}>{'✨'}</span>
-                  <p style={S.reasonText}>{recommendation.reason}</p>
-                </div>
-              </div>
-            )}
           </div>
         )}
       </div>
 
-      {/* === AI Hero Dialog === */}
-      <HeroDialog
-        isOpen={activeChat}
-        onOpen={() => setActiveChat(true)}
-        onClose={() => setActiveChat(false)}
-        trigger={
-          <div style={S.fab}>
-            <span style={S.fabIcon}>{'帮你搭'}</span>
-          </div>
-        }
+      {/* === AI Chat FAB (layoutId shared with StylingChat) === */}
+      <motion.div
+        layoutId={CHAT_LAYOUT_ID}
+        style={S.fab}
+        onClick={() => !activeChat && setActiveChat(true)}
       >
-        <div style={S.chatPanel}>
-          <div style={S.chatHeader}>
-            <span style={S.chatTitle}>{'AI 搭配助手'}</span>
-          </div>
-          <div style={S.chatHint}>
-            {'告诉我你的穿搭需求，例如：“适合约会的温柔风格”'}
-          </div>
-          {missingCategories.length > 0 && (
-            <div style={S.missingHint}>
-              {'缺少：'}
-              {missingCategories.map((c) => (
-                <span key={c} style={S.missingTag}>{categoryLabel[c]}</span>
-              ))}
-              {'，先上传后再让 AI 搭配吧'}
-            </div>
-          )}
-          <div style={S.chatInputRow}>
-            <Input
-              placeholder={'描述你想要的搭配风格...'}
-              value={chatInput}
-              onChange={setChatInput}
-              style={{ flex: 1, '--font-size': '14px' } as React.CSSProperties}
-              onEnterPress={handleSendChat}
-              disabled={isRequesting}
-            />
-            <Button color="primary" size="small" onClick={handleSendChat} disabled={!chatInput.trim() || isRequesting} loading={isRequesting}>
-              {'发送'}
-            </Button>
-          </div>
-        </div>
-      </HeroDialog>
+        <motion.span
+          style={S.fabIcon}
+          animate={{ opacity: activeChat ? 0 : 1 }}
+          transition={{ duration: 0.15 }}
+        >
+          {'帮你搭'}
+        </motion.span>
+      </motion.div>
+
+      {/* === AI Chat Overlay === */}
+      <StylingChat
+        isOpen={activeChat}
+        onClose={() => setActiveChat(false)}
+        onRecommend={handleChatRecommend}
+      />
 
       {/* === Animating overlay === */}
       {isAnimating && (
@@ -435,13 +391,8 @@ const S: Record<string, React.CSSProperties> = {
     padding: '12px 20px 0',
     flexShrink: 0,
   },
-  headerLeft: {
-    width: 32,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    cursor: 'pointer',
-    color: '#000',
+  headerSpacer: {
+    width: 80,
   },
   headerTitle: {
     fontSize: 20,
@@ -473,12 +424,12 @@ const S: Record<string, React.CSSProperties> = {
   scrollArea: {
     flex: 1,
     overflowY: 'auto',
-    padding: '4px 0 0',
+    padding: 0,
     WebkitOverflowScrolling: 'touch',
   },
   captureWrap: {
     background: '#fff',
-    padding: '4px 0 20px',
+    padding: '32px 0 8px',
   },
   /* Loading / error */
   loadingWrap: {
@@ -494,28 +445,11 @@ const S: Record<string, React.CSSProperties> = {
     fontSize: 13,
     color: '#999',
   },
-  /* Recommendation */
-  recommendationPanel: {
-    animation: 'fadeInUp 0.4s ease-out',
-    margin: '4px 20px 0',
-  },
-  reasonCard: {
-    background: '#fafafa',
-    borderRadius: 12,
-    padding: 16,
-    border: '1px solid #eee',
-  },
-  reasonIcon: {
-    fontSize: 18,
-  },
-  reasonText: {
-    fontSize: 14,
-    lineHeight: '22px',
-    color: '#333',
-    margin: '8px 0 0',
-  },
-  /* FAB (trigger visual only, positioned by HeroDialog) */
+  /* FAB */
   fab: {
+    position: 'absolute',
+    right: 20,
+    bottom: 80,
     height: 44,
     paddingLeft: 18,
     paddingRight: 18,
@@ -526,6 +460,7 @@ const S: Record<string, React.CSSProperties> = {
     justifyContent: 'center',
     cursor: 'pointer',
     boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
+    zIndex: 10,
   },
   fabIcon: {
     color: '#fff',
@@ -533,51 +468,6 @@ const S: Record<string, React.CSSProperties> = {
     fontWeight: 600,
     letterSpacing: '0.5px',
     whiteSpace: 'nowrap' as const,
-  },
-  /* Chat content */
-  chatPanel: {
-    padding: 20,
-  },
-  chatHeader: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-  },
-  chatTitle: {
-    fontSize: 17,
-    fontWeight: 600,
-    color: '#000',
-  },
-  chatHint: {
-    fontSize: 13,
-    color: '#999',
-    marginBottom: 14,
-    lineHeight: '20px',
-  },
-  missingHint: {
-    fontSize: 13,
-    color: '#d4380d',
-    background: '#fff2e8',
-    padding: '8px 12px',
-    borderRadius: 10,
-    marginBottom: 14,
-    lineHeight: '20px',
-  },
-  missingTag: {
-    display: 'inline-block',
-    background: '#ff7a45',
-    color: '#fff',
-    padding: '2px 8px',
-    borderRadius: 10,
-    fontSize: 12,
-    fontWeight: 600,
-    margin: '0 4px',
-  },
-  chatInputRow: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 8,
   },
   /* Animation overlay */
   animOverlay: {

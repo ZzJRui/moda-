@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
-  NavBar,
   Empty,
   Button,
   Image,
@@ -106,9 +105,15 @@ export function FavoritesList() {
 
     return (
       <div style={styles.page}>
-        <NavBar onBack={() => setSelectedDetail(null)} style={styles.navBar}>
-          {'搭配详情'}
-        </NavBar>
+        <div style={styles.header}>
+          <button style={styles.backBtn} onClick={() => setSelectedDetail(null)}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </button>
+          <span style={styles.headerTitle}>{'搭配详情'}</span>
+          <div style={styles.headerSpacer} />
+        </div>
         <div style={styles.detailScroll}>
           <Image
             src={selectedDetail.screenshotPath}
@@ -170,7 +175,11 @@ export function FavoritesList() {
   if (loading) {
     return (
       <div style={styles.page}>
-        <NavBar backIcon={null} style={styles.navBar}>{'穿搭'}</NavBar>
+        <div style={styles.header}>
+          <div style={styles.headerSpacer} />
+          <span style={styles.headerTitle}>{'穿搭'}</span>
+          <div style={styles.headerSpacer} />
+        </div>
         <div style={styles.stateWrap}>
           <SpinLoading color="primary" />
           <span style={styles.stateHint}>{'加载中...'}</span>
@@ -183,7 +192,11 @@ export function FavoritesList() {
   if (listError) {
     return (
       <div style={styles.page}>
-        <NavBar backIcon={null} style={styles.navBar}>{'穿搭'}</NavBar>
+        <div style={styles.header}>
+          <div style={styles.headerSpacer} />
+          <span style={styles.headerTitle}>{'穿搭'}</span>
+          <div style={styles.headerSpacer} />
+        </div>
         <div style={styles.stateWrap}>
           <ErrorBlock status="default" title="加载失败" description={listError} />
           <Button color="primary" size="small" onClick={() => void fetchFavorites()} style={{ marginTop: 12 }}>
@@ -199,7 +212,15 @@ export function FavoritesList() {
   if (favorites.length === 0) {
     return (
       <div style={styles.page}>
-        <NavBar onBack={() => navigate(-1)} style={styles.navBar}>{'穿搭'}</NavBar>
+        <div style={styles.header}>
+          <button style={styles.backBtn} onClick={() => navigate(-1)}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </button>
+          <span style={styles.headerTitle}>{'穿搭'}</span>
+          <div style={styles.headerSpacer} />
+        </div>
         <div style={styles.emptyContainer}>
           <Empty description={'还没有收藏的搭配'} imageStyle={styles.emptyImage} />
           <Button
@@ -219,7 +240,11 @@ export function FavoritesList() {
   /* ============ 主视图 ============ */
   return (
     <div style={styles.page}>
-      <NavBar backIcon={null} style={styles.navBar}>{'穿搭'}</NavBar>
+      <div style={styles.header}>
+        <div style={styles.headerSpacer} />
+        <span style={styles.headerTitle}>{'穿搭'}</span>
+        <div style={styles.headerSpacer} />
+      </div>
 
       {detailLoading && (
         <div style={styles.overlayLoading}>
@@ -227,8 +252,9 @@ export function FavoritesList() {
         </div>
       )}
 
-      <PullToRefresh onRefresh={handleRefresh}>
-        <div style={styles.gridContainer}>
+      <div style={styles.scrollWrap}>
+        <PullToRefresh onRefresh={handleRefresh}>
+          <div style={styles.gridContainer}>
           {favorites.map((fav) => (
             <div
               key={fav.id}
@@ -258,6 +284,7 @@ export function FavoritesList() {
           ))}
         </div>
       </PullToRefresh>
+      </div>
 
       <SafeArea position="bottom" />
     </div>
@@ -276,10 +303,34 @@ const styles: Record<string, React.CSSProperties> = {
     background: 'var(--adm-color-background, #f5f5f5)',
     position: 'relative',
   },
-  navBar: {
+  /* Header — identical structure to styling page */
+  header: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: '12px 20px 0',
     flexShrink: 0,
-    borderBottom: '1px solid var(--adm-color-border, #eee)',
-    fontWeight: 600,
+    background: '#fff',
+  },
+  headerSpacer: {
+    width: 80,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: 700,
+    color: '#000',
+    letterSpacing: '-0.3px',
+  },
+  backBtn: {
+    width: 80,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    border: 'none',
+    background: 'none',
+    padding: 0,
+    cursor: 'pointer',
+    color: '#000',
   },
   emptyContainer: {
     flex: 1,
@@ -320,11 +371,16 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: 'center',
     zIndex: 10,
   },
+  scrollWrap: {
+    flex: 1,
+    overflowY: 'auto',
+    WebkitOverflowScrolling: 'touch',
+  },
   gridContainer: {
     display: 'grid',
     gridTemplateColumns: '1fr 1fr',
     gap: 12,
-    padding: 12,
+    padding: '12px 12px 80px',
   },
   gridCard: {
     borderRadius: 12,

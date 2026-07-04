@@ -1,5 +1,6 @@
-import { useCallback } from 'react'
-import { SafeArea } from 'antd-mobile'
+import { useState, useCallback } from 'react'
+import { SafeArea, Toast } from 'antd-mobile'
+import { motion } from 'framer-motion'
 import {
   BrowserRouter,
   Routes,
@@ -12,6 +13,11 @@ import { StylingHome } from '../ai-styling/ai-styling'
 import { UploadSheet } from '../upload/upload'
 import { FavoritesList } from '../favorites/favorites'
 import { ClosetList } from '../closet/closet'
+import { UploadBubbleMenu } from './UploadBubbleMenu'
+import { UploadCapsule } from './UploadCapsule'
+import type { UploadStatus } from './UploadCapsule'
+import { uploadClothesWithProgress } from '../../api/clothes'
+import { ApiError } from '../../api/errors'
 
 /* -------------------------------------------------- */
 /*  SVG Icons (minimal, inline)                        */
@@ -88,6 +94,16 @@ const communityStyles: Record<string, React.CSSProperties> = {
    FLOW: App Shell - Redesigned
    ================================================================ */
 
+const ALLOWED_EXTS = ['jpg', 'jpeg', 'png', 'webp']
+const MAX_UPLOAD_BYTES = 8 * 1024 * 1024
+
+function validateUploadFile(file: File): string | null {
+  const ext = file.name.split('.').pop()?.toLowerCase() ?? ''
+  if (!ALLOWED_EXTS.includes(ext)) return `仅支持 ${ALLOWED_EXTS.join('/')} 格式`
+  if (file.size > MAX_UPLOAD_BYTES) return '文件过大（>8MB）'
+  return null
+}
+
 function AppShellInner() {
   const navigate = useNavigate()
   const location = useLocation()
@@ -109,9 +125,64 @@ function AppShellInner() {
 
   const activeKey = tabs.some((t) => t.key === currentPath) ? currentPath : '/style'
 
+  /* ---- Bubble menu & inline upload ---- */
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [uploadVisible, setUploadVisible] = useState(false)
+  const [uploadStatus, setUploadStatus] = useState<UploadStatus>('uploading')
+  const [uploadErrorMsg, setUploadErrorMsg] = useState<string | undefined>()
+
+  const handleToggleMenu = useCallback(() => {
+    setMenuOpen((prev) => !prev)
+  }, [])
+
+  const handleCloseMenu = useCallback(() => {
+    setMenuOpen(false)
+  }, [])
+
+  const handleFileSelected = useCallback(async (file: File) => {
+    setMenuOpen(false)
+    const err = validateUploadFile(file)
+    if (err) {
+      Toast.show({ content: err, position: 'bottom' })
+      return
+    }
+    setUploadProgress(0)
+    setUploadStatus('uploading')
+    setUploadVisible(true)
+    setUploadErrorMsg(undefined)
+    try {
+      await uploadClothesWithProgress(file, (p) => setUploadProgress(p))
+      setUploadStatus('success')
+      setUploadProgress(100)
+      window.setTimeout(() => {
+        setUploadVisible(false)
+        navigate('/closet')
+      }, 1500)
+    } catch (e) {
+      setUploadStatus('error')
+      setUploadErrorMsg(e instanceof ApiError ? e.message : '上传失败')
+    }
+  }, [navigate])
+
   return (
-    <div style={S.appShell}>
-      <div style={S.phoneFrame}>
+    <div style={S.appShell} className="app-shell">
+      <div style={S.phoneFrame} className="phone-frame">
+        {/* Brand Header */}
+        <div style={S.brandBar} className="brand-bar">
+          <img src="/logo.png" alt="摩搭moda" style={S.brandLogo} />
+          <span style={S.brandName}>{'摩搭moda'}</span>
+        </div>
+
+        {/* Upload progress capsule */}
+        <UploadCapsule
+          visible={uploadVisible}
+          progress={uploadProgress}
+          status={uploadStatus}
+          errorMsg={uploadErrorMsg}
+          onDismiss={() => setUploadVisible(false)}
+        />
+
         {/* Route content */}
         <div style={S.routeArea}>
           <Routes>
@@ -125,7 +196,7 @@ function AppShellInner() {
         </div>
 
         {/* Bottom Navigation - custom icon-based */}
-        <div style={S.bottomNav}>
+        <div style={S.bottomNav} className="bottom-nav">
           {tabs.slice(0, 2).map((tab) => {
             const isActive = tab.key === activeKey
             const IconComp = tab.icon
@@ -167,11 +238,24 @@ function AppShellInner() {
             )
           })}
 
-          {/* Center + button */}
-          <div style={S.centerPlus} onClick={() => navigate('/upload')}>
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round">
-              <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
+          {/* Bubble menu (renders when open) */}
+          <UploadBubbleMenu
+            isOpen={menuOpen}
+            onClose={handleCloseMenu}
+            onFileSelected={handleFileSelected}
+          />
+
+          {/* Center + / X button */}
+          <div style={S.centerPlus} onClick={handleToggleMenu}>
+            <motion.div
+              animate={{ rotate: menuOpen ? 45 : 0 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            >
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round">
+                <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+            </motion.div>
           </div>
         </div>
         <SafeArea position="bottom" />
@@ -199,7 +283,7 @@ export default function AppShell() {
 const S: Record<string, React.CSSProperties> = {
   appShell: {
     width: '100%',
-    height: '100vh',
+    height: '100dvh',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -216,6 +300,25 @@ const S: Record<string, React.CSSProperties> = {
     position: 'relative',
     overflow: 'hidden',
     boxShadow: '0 0 24px rgba(0,0,0,0.12)',
+  },
+  brandBar: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
+    padding: '12px 20px 4px',
+    flexShrink: 0,
+  },
+  brandLogo: {
+    width: 28,
+    height: 28,
+    objectFit: 'contain' as const,
+    borderRadius: 4,
+  },
+  brandName: {
+    fontSize: 16,
+    fontWeight: 700,
+    color: '#1a1a1a',
+    letterSpacing: '-0.3px',
   },
   routeArea: {
     flex: 1,

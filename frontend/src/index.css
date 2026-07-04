@@ -51,12 +51,11 @@
 }
 
 #root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100dvh;
+  min-height: 100vh; /* fallback */
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
@@ -108,4 +107,73 @@ code {
   line-height: 135%;
   padding: 4px 8px;
   background: var(--code-bg);
+}
+
+/* antd-mobile NavBar — unified with styling page header */
+.adm-nav-bar {
+  height: auto;
+  padding: 0;
+}
+.adm-nav-bar-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #000;
+  letter-spacing: -0.3px;
+  padding: 0;
+}
+
+/* Hide scrollbar globally — touch & wheel scrolling still work */
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+*::-webkit-scrollbar {
+  display: none;
+}
+
+/* Remove tap highlight on mobile */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ================================================
+   dvh fallback for older browsers
+   ================================================ */
+@supports not (height: 100dvh) {
+  .app-shell {
+    height: 100vh !important;
+  }
+}
+
+/* ================================================
+   Mobile responsive — phone frame fills the screen
+   ================================================ */
+@media (max-width: 480px) {
+  body {
+    overflow: hidden;
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .app-shell {
+    background: #fff !important;
+  }
+
+  .phone-frame {
+    max-height: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Safe area insets — notch & home indicator */
+  .brand-bar {
+    padding-top: calc(12px + env(safe-area-inset-top, 0px)) !important;
+  }
+
+  .bottom-nav {
+    padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+  }
+
+  .chat-input-bar {
+    padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important;
+  }
 }
