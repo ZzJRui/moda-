@@ -9,7 +9,16 @@ from __future__ import annotations
 
 import io
 
+import pytest
 from PIL import Image
+
+from app import config
+
+
+@pytest.fixture(autouse=True)
+def _force_rule_provider(monkeypatch):
+    """闭环测试走规则推荐，避免依赖真实 AI 模型。"""
+    monkeypatch.setattr(config, "AI_RECOMMENDATION_PROVIDER", "rule")
 
 
 def _png_bytes() -> bytes:

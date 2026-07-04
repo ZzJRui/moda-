@@ -1,9 +1,8 @@
 """推荐接口测试。FRD-API-004 / FRD-ST-005。
 
-覆盖：
-- 三品类齐全 → 200 + top_id/bottom_id/shoes_id/reason，id 均指向已存在单品
-- 缺品类 → 422，顶层 error/message/missing_categories（不包 detail）
-- 服务层单测：recommend(..., seed=) 确定性返回
+默认 provider=openai_compatible，本文件用 monkeypatch 临时切到 rule，
+验证规则路径：三品类齐全 → 200 + 四键；缺品类 → 422 顶层三字段；
+服务层 recommend(..., seed=) 确定性返回。AI 路径见 test_ai_recommendations.py。
 """
 from __future__ import annotations
 
@@ -11,11 +10,19 @@ from datetime import datetime
 
 import pytest
 
+from app import config
 from app.models import ClothingItem
 from app.services import recommendation_service
 
 
-# ---------------- HTTP 层 ----------------
+# ---------------- HTTP 层（强制 rule 路径） ----------------
+
+
+@pytest.fixture(autouse=True)
+def _force_rule_provider(monkeypatch):
+    """本文件所有 HTTP 测试走规则推荐，避免触发真实 AI 调用。"""
+    monkeypatch.setattr(config, "AI_RECOMMENDATION_PROVIDER", "rule")
+
 
 def test_recommend_success(client, upload_item):
     a = upload_item("top", color="白色", style="休闲").json()

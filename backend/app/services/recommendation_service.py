@@ -48,6 +48,18 @@ class _Scored:
     score: int
 
 
+def find_missing_categories(items: list[ClothingItem]) -> list[str]:
+    """返回缺品类的列表（顺序按 VALID_CATEGORIES，稳定）。
+
+    规则与 AI 两条推荐路径共用：调用模型前先确认三品类齐全。
+    """
+    grouped: dict[str, list[ClothingItem]] = {c: [] for c in VALID_CATEGORIES}
+    for it in items:
+        if it.category in grouped:
+            grouped[it.category].append(it)
+    return [c for c in VALID_CATEGORIES if not grouped[c]]
+
+
 def recommend(
     items: list[ClothingItem],
     text: str,

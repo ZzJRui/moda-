@@ -25,6 +25,17 @@ from app.main import app
 from app import models  # noqa: F401
 
 
+@pytest.fixture(autouse=True)
+def _disable_ai_tagging(monkeypatch):
+    """测试默认关闭 AI 识图打标签，避免上传流程触发真实网络调用。
+
+    现有大量用例通过 upload_item("top")（不带 color/style）触发上传，
+    若 AI_TAGGING_ENABLED 默认 True 会进入 AI 分支发真实请求。此处统一关闭，
+    需要测 AI 打标签的用例在测试体内 monkeypatch.config.AI_TAGGING_ENABLED = True。
+    """
+    monkeypatch.setattr(config, "AI_TAGGING_ENABLED", False)
+
+
 @pytest.fixture(scope="session")
 def test_engine():
     """会话级 in-memory SQLite。

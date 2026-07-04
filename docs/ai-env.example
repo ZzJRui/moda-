@@ -1,0 +1,32 @@
+# AI 推荐环境变量示例（OpenAI-compatible）
+#
+# 复制为 backend/.env 或在 shell 中 export，再启动 uvicorn。
+# 注意：本项目未引入 python-dotenv，ENV 需在进程环境中设置，
+#       直接 source 本文件即可：export $(grep -v '^#' docs/ai-env.example | xargs)
+
+# 推荐后端：openai_compatible（默认，调真实模型）/ rule（本地规则，调试/离线用）
+AI_RECOMMENDATION_PROVIDER=openai_compatible
+
+# 第三方模型地址，必须兼容 OpenAI Chat Completions：
+#   POST {AI_API_BASE_URL}/chat/completions
+AI_API_BASE_URL=https://your-provider.com/v1
+
+# API Key（不会写入日志或异常文本）
+AI_API_KEY=your-key
+
+# 模型名
+AI_MODEL=your-model
+
+# 请求超时（秒）
+# 识图打标签会叠加图片 + reasoning，建议设 30
+AI_TIMEOUT_SECONDS=20
+
+# 上传时自动 AI 识图打标签（复用上面的 AI_* 凭据）。
+# true：用户未填全 category/color/style 时自动调模型补缺，失败降级到规则。
+# false：完全走用户输入 + 规则归一化。
+AI_TAGGING_ENABLED=true
+
+# 兼容旧名（AI_* 优先；未设 AI_* 时回退到这些）：
+# OPENAI_BASE_URL=
+# OPENAI_API_KEY=
+# OPENAI_MODEL=

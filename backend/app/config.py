@@ -7,8 +7,17 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
+# 从 backend/.env 加载本地环境变量（如 AI_API_KEY 等）。
+# 已存在的真实进程 ENV 优先；.env 仅补缺。无 .env 文件时静默跳过。
+from dotenv import load_dotenv
+
+_BASE_DIR = Path(__file__).resolve().parent.parent
+_env_path = _BASE_DIR / ".env"
+if _env_path.exists():
+    load_dotenv(_env_path)
+
 # backend/
-BASE_DIR: Path = Path(__file__).resolve().parent.parent
+BASE_DIR: Path = _BASE_DIR
 
 # 静态上传目录
 UPLOAD_DIR: Path = BASE_DIR / "uploads"
@@ -42,6 +51,23 @@ IMAGE_PROCESSING_ENABLED: bool = os.getenv("IMAGE_PROCESSING_ENABLED", "true").l
 PROCESSED_JPEG_QUALITY: int = 90
 # 白底输出最长边上限（超出按比例缩放，控制 rembg 输入尺寸与产物体积）
 PROCESSED_MAX_SIDE: int = 1200
+
+# --- AI 推荐（OpenAI-compatible /chat/completions，FRD-NF-004 可替换 AI）---
+# provider: openai_compatible（默认，调真实模型）/ rule（本地规则，调试/离线用）
+# 默认走真实 AI；AI 调用失败时返回明确错误，不静默回退规则。
+AI_RECOMMENDATION_PROVIDER: str = os.getenv(
+    "AI_RECOMMENDATION_PROVIDER", "openai_compatible"
+).lower()
+# AI_* 优先于 OPENAI_*（兼容旧名）
+AI_API_BASE_URL: str | None = os.getenv("AI_API_BASE_URL") or os.getenv("OPENAI_BASE_URL")
+AI_API_KEY: str | None = os.getenv("AI_API_KEY") or os.getenv("OPENAI_API_KEY")
+AI_MODEL: str | None = os.getenv("AI_MODEL") or os.getenv("OPENAI_MODEL")
+AI_TIMEOUT_SECONDS: float = float(os.getenv("AI_TIMEOUT_SECONDS", "20"))
+
+# --- AI 识图打标签（复用 AI_* 凭据，独立开关）---
+# True：上传时若用户未填全 category/color/style，自动调模型识图补缺；
+# AI 失败时降级到规则，不阻断上传。False：完全走用户输入 + 规则归一化。
+AI_TAGGING_ENABLED: bool = os.getenv("AI_TAGGING_ENABLED", "true").lower() == "true"
 
 
 def ensure_runtime_dirs() -> None:

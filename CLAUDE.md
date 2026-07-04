@@ -27,7 +27,7 @@ cd backend
 .\venv\Scripts\python.exe -m pytest -q
 ```
 
-最近验证结果：`30 passed`。
+最近验证结果：`49 passed`。
 
 后端自动化闭环已覆盖：
 
@@ -138,6 +138,33 @@ uvicorn app.main:app --reload
   "missing_categories": ["shoes"]
 }
 ```
+
+### AI 推荐
+
+推荐接口默认走真实 AI（OpenAI-compatible `/chat/completions`），不再走规则。
+`AI_RECOMMENDATION_PROVIDER=rule` 时回退本地规则推荐（调试/离线）。
+AI 调用失败时返回明确错误，**不静默回退规则**。错误体均为顶层 `error` / `message`：
+
+| error | HTTP | 触发 |
+| --- | --- | --- |
+| `missing_category` | 422 | 缺品类（调用模型前检查，不调 AI） |
+| `ai_not_configured` | 500 | provider=openai_compatible 但 base_url/key/model 缺失 |
+| `ai_auth_failed` | 401 | 模型接口 401/403 |
+| `ai_unavailable` | 503 | 超时/网络错误/其他非 2xx |
+| `ai_invalid_response` | 502 | 非 JSON / 缺键 / ID 不存在 / 品类不匹配 / reason 空 |
+
+ENV（示例见 `docs/ai-env.example`，未引入 `python-dotenv`，需在进程环境设置）：
+
+```text
+AI_RECOMMENDATION_PROVIDER=openai_compatible   # 或 rule
+AI_API_BASE_URL=https://your-provider.com/v1
+AI_API_KEY=your-key
+AI_MODEL=your-model
+AI_TIMEOUT_SECONDS=20
+# 兼容旧名：OPENAI_BASE_URL / OPENAI_API_KEY / OPENAI_MODEL（AI_* 优先）
+```
+
+分层：`services/ai_client.py`（纯传输，httpx 同步）→ `services/ai_recommendation_service.py`（prompt 构造 + JSON 解析校验）→ `routers/recommendations.py`（按 provider 分发 + 错误映射）。规则实现保留在 `services/recommendation_service.py`。
 
 ## 上传约束
 

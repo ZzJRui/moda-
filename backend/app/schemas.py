@@ -36,6 +36,9 @@ class ClothingItemOut(BaseModel):
     original_image: str
     processed_image: str
     created_at: datetime
+    # 标签来源提示（仅上传响应里赋值，ORM 无此列，GET 详情时为 None）：
+    # manual=用户全填未调 AI / ai=AI 参与并成功 / ai_failed=AI 失败降级到规则
+    tagging_status: str | None = None
 
     @field_serializer("created_at")
     def _ser_created_at(self, v: datetime) -> str:
