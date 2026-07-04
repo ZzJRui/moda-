@@ -1,0 +1,14 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+pydantic
+python-multipart
+pillow
+
+# 测试依赖（Phase 5）
+pytest
+httpx
+
+# 图片处理（Phase 2.2）：rembg 抠图，Pillow 白底合成。
+# 用 [cpu] extras 锁定 onnxruntime CPU 后端；首次调用时自动下载 u2net 模型到 ~/.rembg/。
+rembg[cpu]

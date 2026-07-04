@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.pyc
+venv/
+.pytest_cache/
+
+# 运行时数据（由 backend/.gitignore 兜底，根级再保险一次）
+*.db
+app/data/
+uploads/
+
+# 编辑器 / 系统
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# 手动联调遗留的临时测试图（UUID 命名），不入库
+ff540feecea7b8877c68c0e94563b3b7.jpg

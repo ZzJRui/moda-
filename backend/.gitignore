@@ -1,0 +1,9 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# 运行时数据
+app/data/
+uploads/
+*.db
