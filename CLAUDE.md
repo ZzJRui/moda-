@@ -160,7 +160,7 @@ AI_RECOMMENDATION_PROVIDER=openai_compatible   # 或 rule
 AI_API_BASE_URL=https://your-provider.com/v1
 AI_API_KEY=your-key
 AI_MODEL=your-model
-AI_TIMEOUT_SECONDS=20
+AI_TIMEOUT_SECONDS=60
 # 兼容旧名：OPENAI_BASE_URL / OPENAI_API_KEY / OPENAI_MODEL（AI_* 优先）
 ```
 

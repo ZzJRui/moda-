@@ -18,8 +18,8 @@ AI_API_KEY=your-key
 AI_MODEL=your-model
 
 # 请求超时（秒）
-# 识图打标签会叠加图片 + reasoning，建议设 30
-AI_TIMEOUT_SECONDS=20
+# 识图打标签 + 推荐都可能到 25~35 秒，默认 60 覆盖长尾
+AI_TIMEOUT_SECONDS=60
 
 # 上传时自动 AI 识图打标签（复用上面的 AI_* 凭据）。
 # true：用户未填全 category/color/style 时自动调模型补缺，失败降级到规则。

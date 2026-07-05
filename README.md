@@ -83,7 +83,7 @@ AI_RECOMMENDATION_PROVIDER=openai_compatible   # 或 rule 回退本地规则
 AI_API_BASE_URL=https://your-provider.com/v1
 AI_API_KEY=your-key
 AI_MODEL=your-model
-AI_TIMEOUT_SECONDS=20
+AI_TIMEOUT_SECONDS=60
 AI_TAGGING_ENABLED=true                        # 上传时自动识图打标签
 ```
 

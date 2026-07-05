@@ -62,7 +62,7 @@ AI_RECOMMENDATION_PROVIDER: str = os.getenv(
 AI_API_BASE_URL: str | None = os.getenv("AI_API_BASE_URL") or os.getenv("OPENAI_BASE_URL")
 AI_API_KEY: str | None = os.getenv("AI_API_KEY") or os.getenv("OPENAI_API_KEY")
 AI_MODEL: str | None = os.getenv("AI_MODEL") or os.getenv("OPENAI_MODEL")
-AI_TIMEOUT_SECONDS: float = float(os.getenv("AI_TIMEOUT_SECONDS", "20"))
+AI_TIMEOUT_SECONDS: float = float(os.getenv("AI_TIMEOUT_SECONDS", "60"))
 
 # --- AI 识图打标签（复用 AI_* 凭据，独立开关）---
 # True：上传时若用户未填全 category/color/style，自动调模型识图补缺；
