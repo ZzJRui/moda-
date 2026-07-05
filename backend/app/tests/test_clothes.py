@@ -154,8 +154,8 @@ def test_list_filters_and_shape(client, upload_item):
     black = client.get("/api/clothes", params={"q": "黑色"}).json()
     assert {it["id"] for it in black} == {b["id"]}
 
-    # q 命中 name（a_top 的 name 为 a_top）
-    by_name = client.get("/api/clothes", params={"q": "a_top"}).json()
+    # q 命中 name（a 的 name 由 color_base + subtype 拼成 "白色T恤"）
+    by_name = client.get("/api/clothes", params={"q": "白色T恤"}).json()
     assert {it["id"] for it in by_name} == {a["id"]}
 
     # 组合过滤

@@ -9,8 +9,6 @@
 from __future__ import annotations
 
 import mimetypes
-import re
-from pathlib import Path
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from fastapi.responses import JSONResponse
@@ -31,18 +29,6 @@ from app.services import (
 from app.services.tag_constants import ALL_TAG_FIELDS
 
 router = APIRouter(prefix="/api/clothes", tags=["clothes"])
-
-# 名称安全字符：字母数字下划线短横 + CJK
-_NAME_SAFE = re.compile(r"[^\w一-龥-]+")
-
-
-def _generate_name(original_filename: str) -> str:
-    """从原始文件名 stem 派生可读名称；不可用时回退 '未命名单品'。"""
-    stem = Path(original_filename).stem
-    stem = _NAME_SAFE.sub("_", stem).strip("_")
-    if not stem:
-        return "未命名单品"
-    return stem[:60]
 
 
 @router.post(
@@ -97,7 +83,7 @@ def upload_clothing(
 
     # 4. 写库
     item = ClothingItem(
-        name=_generate_name(file.filename or ""),
+        name=tagging_service.compose_display_name(tags),
         **tags.model_dump(),
         original_image=original_url,
         processed_image=processed_url,
@@ -243,6 +229,7 @@ def auto_tag_clothing(item_id: int, db: Session = Depends(get_db)) -> ClothingIt
     item.category = tags.category
     for field in ALL_TAG_FIELDS:
         setattr(item, field, getattr(tags, field))
+    item.name = tagging_service.compose_display_name(tags)
     db.commit()
     db.refresh(item)
     return ClothingItemOut.model_validate(item).model_copy(

@@ -131,3 +131,54 @@ def test_generate_tags_clears_specific_on_category_switch():
     assert out.category == "shoes"
     assert out.sleeve_length is None
     assert out.shoe_cut == "低帮"
+
+
+# ---------------- compose_display_name ----------------
+
+def test_compose_display_name_full():
+    tags = tagging_service.generate_tags(
+        category="top", subtype="T恤", color_base="白色"
+    )
+    assert tagging_service.compose_display_name(tags) == "白色T恤"
+
+
+def test_compose_display_name_only_color():
+    # subtype 未识别（unknown）时只用颜色
+    tags = tagging_service.generate_tags(category="bottom", color_base="黑色")
+    assert tagging_service.compose_display_name(tags) == "黑色"
+
+
+def test_compose_display_name_only_subtype():
+    # 颜色未识别时只用 subtype
+    tags = tagging_service.generate_tags(category="shoes", subtype="运动鞋")
+    assert tagging_service.compose_display_name(tags) == "运动鞋"
+
+
+def test_compose_display_name_fallback_by_category():
+    # 颜色和 subtype 都 unknown → 品类默认名
+    assert (
+        tagging_service.compose_display_name(
+            tagging_service.generate_tags(category="top")
+        )
+        == "上衣"
+    )
+    assert (
+        tagging_service.compose_display_name(
+            tagging_service.generate_tags(category="bottom")
+        )
+        == "下装"
+    )
+    assert (
+        tagging_service.compose_display_name(
+            tagging_service.generate_tags(category="shoes")
+        )
+        == "鞋子"
+    )
+
+
+def test_compose_display_name_soft_subtype_kept():
+    # subtype 软枚举：表外值直接拼入名称
+    tags = tagging_service.generate_tags(
+        category="top", subtype="汉服", color_base="红色"
+    )
+    assert tagging_service.compose_display_name(tags) == "红色汉服"

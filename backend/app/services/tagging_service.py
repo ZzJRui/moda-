@@ -27,7 +27,32 @@ from app.services.tag_constants import (
 
 # 兼容旧 import：ai_tagging_service / ai_recommendation_service / recommendation_service
 # 仍从本模块取 VALID_CATEGORIES / DEFAULT_CATEGORY。
-__all__ = ["VALID_CATEGORIES", "DEFAULT_CATEGORY", "UNKNOWN", "generate_tags"]
+__all__ = [
+    "VALID_CATEGORIES",
+    "DEFAULT_CATEGORY",
+    "UNKNOWN",
+    "generate_tags",
+    "compose_display_name",
+]
+
+# 品类中文兜底：AI 未识别出 color_base + subtype 时使用
+_CATEGORY_FALLBACK = {"top": "上衣", "bottom": "下装", "shoes": "鞋子"}
+
+
+def compose_display_name(tags: TagOutput) -> str:
+    """从归一化后的 TagOutput 拼中文展示名：颜色 + subtype。
+
+    - 未知字段跳过；
+    - 颜色与 subtype 均缺失时回退品类默认名；
+    - 品类未知时兜底 "未命名单品"；
+    - 上限 60 字符，与 _NAME_SAFE 老逻辑保持一致。
+    """
+    color = tags.color_base if tags.color_base and tags.color_base != UNKNOWN else ""
+    subtype = tags.subtype if tags.subtype and tags.subtype != UNKNOWN else ""
+    name = f"{color}{subtype}".strip()
+    if not name:
+        return _CATEGORY_FALLBACK.get(tags.category, "未命名单品")
+    return name[:60]
 
 
 def generate_tags(category: str | None = None, **fields) -> TagOutput:

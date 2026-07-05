@@ -92,6 +92,8 @@ def test_upload_ai_tags_full(client, sample_images, monkeypatch):
     assert body["style"] == "休闲"
     assert body["material"] == "棉"
     assert body["tagging_status"] == "ai"
+    # name 由 color_base + subtype 拼出，不再是文件名
+    assert body["name"] == "红色T恤"
 
 
 def test_upload_ai_unavailable_degrades(client, sample_images, monkeypatch):
@@ -107,6 +109,8 @@ def test_upload_ai_unavailable_degrades(client, sample_images, monkeypatch):
     assert body["style"] == "unknown"
     assert body["material"] == "unknown"
     assert body["tagging_status"] == "ai_failed"
+    # 降级时无颜色 + subtype，回退品类默认名，不再暴露文件名
+    assert body["name"] == "上衣"
 
 
 def test_upload_ai_invalid_json_degrades(client, sample_images, monkeypatch):
@@ -131,6 +135,7 @@ def test_auto_tag_success(client, sample_images, monkeypatch):
     _stub_tag(monkeypatch, _full_payload("top"))
     created = _upload_raw(client, sample_images).json()
     item_id = created["id"]
+    assert created["name"] == "红色T恤"
 
     # 重打标签：换一套不同值
     new_payload = {
@@ -151,10 +156,13 @@ def test_auto_tag_success(client, sample_images, monkeypatch):
     # 上衣专属字段被清空（category 现在是 bottom）
     assert body["sleeve_length"] is None
     assert body["tagging_status"] == "ai"
+    # name 同步刷新为新标签的 color_base + subtype
+    assert body["name"] == "黑色牛仔裤"
 
     detail = client.get(f"/api/clothes/{item_id}").json()
     assert detail["category"] == "bottom"
     assert detail["color_base"] == "黑色"
+    assert detail["name"] == "黑色牛仔裤"
 
 
 def test_auto_tag_unavailable(client, sample_images, monkeypatch):
