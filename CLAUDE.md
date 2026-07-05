@@ -44,14 +44,14 @@ cd backend
 
 注意：todo v3 Phase 5 还要求用 Swagger 或 curl 手动完整跑一遍后端闭环。自动化测试已通过，但在进入大量前端联调前，建议再做一次手动验收，确认真实文件上传、静态图片 URL、Swagger 表单体验正常。
 
-前端尚未初始化。下一步应进入 Phase 6：创建 `frontend/`，初始化 React + Vite + TypeScript + antd-mobile v5 + framer-motion + react-router-dom，搭建路由、API client、底部导航和页面骨架（截图用 `html2canvas`）。
+前端已初始化在 `frontend/`，React 19 + Vite 8 + TypeScript + antd-mobile v5 + framer-motion + react-router-dom v7 + html2canvas 已装齐；路由、API client、底部导航、四个主页面骨架均已就绪。当前进入前端联调阶段，接真实后端接口，不再依赖 mock。
 
 ## 技术栈
 
 | 层 | 技术 |
 | --- | --- |
 | 后端 | Python + FastAPI + SQLAlchemy + SQLite + Pillow |
-| 前端 | React 18 + TypeScript + Vite；UI 用 antd-mobile v5，动画用 framer-motion，路由用 react-router-dom，截图用 `html2canvas` |
+| 前端 | React 19 + TypeScript + Vite 8；UI 用 antd-mobile v5，动画用 framer-motion，路由用 react-router-dom v7，截图用 `html2canvas` |
 | 存储 | 本地 `backend/uploads/`，分 `original` / `processed` / `favorites` 子目录 |
 
 ## 后端命令
@@ -247,24 +247,66 @@ cd backend
 - `datetime.utcnow()` 后续会弃用，可改为 timezone-aware UTC。
 - Starlette `TestClient` 对当前 `httpx` 组合有弃用提示。
 
+## 前端命令
+
+前端在 `frontend/`，使用 npm 与本地 `node_modules/`。
+
+```powershell
+cd frontend
+npm install         # 首次或依赖变更后
+npm run dev         # 开发服务器
+npm run build       # tsc -b && vite build
+npm run preview     # 预览构建产物
+npm run lint        # oxlint
+```
+
+开发服务器默认监听 `http://localhost:5173`。
+
+## 前端结构
+
+入口与路由：
+
+- `src/main.tsx` → `src/App.tsx` → `src/flows/ai-closet/ai-closet.tsx`（`AppShell`）
+- 路由由 `BrowserRouter` + `Routes` 定义在 `ai-closet.tsx`，四条主路径 + 兜底：
+  - `/style`（默认首页，AI 搭配主页）
+  - `/closet`（衣柜列表）
+  - `/upload`（上传单品）
+  - `/favorites`（收藏列表）
+  - `/community`（占位）
+  - `*` 兜底 `Navigate to /style`
+- 底部导航、上传胶囊 (`UploadCapsule`) 与气泡菜单 (`UploadBubbleMenu`) 均在 `AppShell` 内维护。
+
+按 flow 组织 UI，不使用 `pages/components` 二分：
+
+```text
+src/
+  api/                     # HTTP 层与错误归一化
+    client.ts              # fetch 封装，BASE_URL 从 VITE_API_BASE_URL/window.origin 推断
+    errors.ts              # ApiError + parseApiError（顶层 error/message）
+    dto.ts                 # 后端 schema TS 类型镜像
+    clothes.ts             # 上传/列表/详情/删除/auto-tag，含 XHR 进度封装
+    outfits.ts             # 保存穿搭
+    recommendations.ts     # AI 推荐
+    favorites.ts           # 收藏截图上传与列表
+  flows/
+    ai-closet/             # AppShell、底部导航、上传胶囊 / 气泡菜单
+    ai-styling/            # 首页 StylingHome + Hero + 三组老虎机 + 对话
+    upload/                # 上传抽屉
+    closet/                # 衣柜列表
+    favorites/             # 收藏双列
+    shared/                # image-url / mappers / types，跨 flow 复用
+  utils/device.ts          # 设备信息
+  assets/  public/         # 静态资源
+```
+
 ## 前端开发约定
 
-前端尚未创建。按 todo v3 Phase 6 开始：
-
-- 创建 `frontend/`
-- 初始化 React 18 + Vite + TypeScript
-- 引入 antd-mobile v5（Swiper、Popup、NavBar、Toast 等）
-- 引入 framer-motion（hero animation、弹簧物理动效）
-- 配置 react-router-dom，默认首页 `/style`
-- 截图功能接入 `html2canvas`
-- 创建 API client，连接 FastAPI 后端
-- 先做四页骨架和全局导航，再接上传、衣柜、搭配、收藏闭环
-
-> 注：UI 组件统一用 antd-mobile v5，不再单独引入 Tailwind CSS。
-
-建议优先接真实后端 API，不要再长期依赖前端 mock，因为后端接口已经可用。
-
-建议目录结构见 `docs/ai-closet-stylist-mvp-todo-v3.md` 第 2 节。
+- UI 组件统一用 antd-mobile v5（Swiper、Popup、NavBar、Toast、SafeArea 等），不再引入 Tailwind CSS。
+- 动画走 framer-motion（Hero、弹簧过渡）。
+- API 层：所有请求经 `api/client.ts` 的 `request<T>()`；错误统一抛 `ApiError`，UI 层用 `err.message` 直接 Toast 即可。
+- BASE URL：开发默认 `window.location.origin`（同源）或 `VITE_API_BASE_URL`。若前后端跨端口开发，需要在 `.env.local` 里配置 `VITE_API_BASE_URL=http://127.0.0.1:8000`，或在 `vite.config.ts` 加 `server.proxy`（当前 vite.config 未设代理）。
+- 静态图片 URL：后端返回的 `original_image_path` / `processed_image_path` 是相对路径，前端在 `flows/shared/image-url.ts` 里拼接 `getApiBaseUrl()` 展示。
+- 优先接真实后端，不再依赖前端 mock；后端接口已完全可用。
 
 ## 约定
 
