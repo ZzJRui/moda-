@@ -71,14 +71,22 @@ if _FRONTEND_DIST.exists():
     async def _spa_root():  # noqa: D401
         return _FileResponse(_INDEX_HTML)
 
-    # SPA 深链兜底：非 /api、/uploads、/health、/docs、/openapi.json 的 GET 请求返回 index.html，
-    # 让 react-router 接管前端路由。
+    # SPA 深链兜底：非 /api、/uploads、/health、/docs、/openapi.json 的 GET 请求，
+    # 先尝试从 dist/ 静态文件命中（logo.png / favicon.svg / images/... 等），
+    # 命不中再返回 index.html，让 react-router 接管前端路由。
     @app.exception_handler(404)
     async def _spa_fallback(request, exc):  # noqa: D401
         path = request.url.path
         if request.method == "GET" and not path.startswith(
             ("/api", "/uploads", "/health", "/docs", "/openapi", "/redoc")
         ):
+            candidate = (_FRONTEND_DIST / path.lstrip("/")).resolve()
+            try:
+                candidate.relative_to(_FRONTEND_DIST.resolve())
+            except ValueError:
+                candidate = None  # 路径穿越，拒绝
+            if candidate and candidate.is_file():
+                return _FileResponse(candidate)
             return _FileResponse(_INDEX_HTML)
         # 保留 FastAPI 默认 JSON 404
         from fastapi.responses import JSONResponse as _JSONResponse

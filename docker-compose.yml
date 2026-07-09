@@ -1,0 +1,26 @@
+# AI 衣柜一键部署
+# 用法：配好 .env 后 `docker compose up -d --build`
+# 架构：单容器，FastAPI 同时服务 API + 前端 SPA + /uploads 静态图片
+services:
+  ai-closet:
+    build: .
+    image: ai-closet:latest
+    container_name: ai-closet
+    restart: unless-stopped
+    ports:
+      # 左边 80 是宿主机端口（浏览器访问 http://公网IP），右边 8000 是容器内 uvicorn
+      - "80:8000"
+    env_file:
+      - .env
+    volumes:
+      # 上传的图片持久化（删容器不丢）
+      - uploads:/app/backend/uploads
+      # SQLite 数据库持久化
+      - db-data:/app/backend/app/data
+      # rembg 模型缓存（首次抠图会下载 ~176MB u2net 模型，缓存后不再重复下载）
+      - rembg-cache:/root/.rembg
+
+volumes:
+  uploads:
+  db-data:
+  rembg-cache:
