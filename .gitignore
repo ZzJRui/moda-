@@ -9,6 +9,10 @@ venv/
 app/data/
 uploads/
 
+# 运行时日志，不入库
+*.log
+uvicorn.log
+
 # 编辑器 / 系统
 .vscode/
 .idea/
@@ -30,3 +34,6 @@ frontend/.env.local
 
 .playwright-mcp/
 ai-closet-mvp(4)/
+
+# 手动准备的测试素材图片（按男女/品类分目录），本地保留但不入库
+衣橱/
