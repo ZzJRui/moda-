@@ -1,0 +1,57 @@
+INFO:     Started server process [8676]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     127.0.0.1:49680 - "GET /health HTTP/1.1" 200 OK
+INFO:     119.97.45.193:0 - "GET / HTTP/1.1" 200 OK
+INFO:     183.95.249.136:0 - "GET /style HTTP/1.1" 200 OK
+INFO:     183.95.249.136:0 - "GET /assets/index-DJ_rOrDC.js HTTP/1.1" 304 Not Modified
+INFO:     183.95.249.136:0 - "GET /assets/index-CPMyxe01.css HTTP/1.1" 304 Not Modified
+INFO:     183.95.249.136:0 - "GET /logo.png HTTP/1.1" 200 OK
+INFO:     183.95.249.136:0 - "GET /api/clothes HTTP/1.1" 200 OK
+INFO:     183.95.249.136:0 - "GET /uploads/processed/04dfca7aa82f4ab49503d22ce1304d92.jpg HTTP/1.1" 304 Not Modified
+INFO:     183.95.249.136:0 - "GET /uploads/processed/e89cee060be64f4dabc4e73d62a6e177.jpg HTTP/1.1" 304 Not Modified
+INFO:     183.95.249.136:0 - "GET /uploads/processed/c53a015c57cc4ec296c9cdf872f342a0.jpg HTTP/1.1" 304 Not Modified
+INFO:     183.95.249.136:0 - "GET /uploads/processed/95427b58d8b14bd187445698220f94d1.jpg HTTP/1.1" 304 Not Modified
+INFO:     183.95.249.136:0 - "GET /uploads/processed/7f64bbe23c9b4657a498546eae637d10.jpg HTTP/1.1" 304 Not Modified
+INFO:     183.95.249.136:0 - "GET /uploads/processed/a56320d0635a44df9a64207f72a8c462.jpg HTTP/1.1" 304 Not Modified
+INFO:     183.95.249.136:0 - "GET /uploads/processed/78d47db8c57747c086e1b00c37cc338b.jpg HTTP/1.1" 304 Not Modified
+INFO:     183.95.249.136:0 - "GET /uploads/processed/de1b63fd80b8462eac19b6ff2e14d566.jpg HTTP/1.1" 304 Not Modified
+INFO:     183.95.249.136:0 - "GET /uploads/processed/5e02e02247954b8481a304f77817adf2.jpg HTTP/1.1" 304 Not Modified
+INFO:     183.95.249.136:0 - "GET /uploads/processed/03c7e6f0444a4be5a220af1e5ace3970.jpg HTTP/1.1" 304 Not Modified
+INFO:     183.95.249.136:0 - "GET /uploads/processed/264f096a59b245688f3bdf946a449b87.jpg HTTP/1.1" 304 Not Modified
+INFO:     183.95.249.136:0 - "GET /uploads/processed/bcc937261ac14e5780743a63b4733aea.jpg HTTP/1.1" 304 Not Modified
+INFO:     183.95.249.136:0 - "GET /uploads/processed/a7f3829cfd394ec9abc0a6cbbfa06473.jpg HTTP/1.1" 304 Not Modified
+INFO:     183.95.249.136:0 - "GET /uploads/processed/c48ddd7dbe184ebcb45d08aad0b2f52c.jpg HTTP/1.1" 304 Not Modified
+INFO:     183.95.249.136:0 - "GET /uploads/processed/437aa4496bbe48e2877b9712af1f45ab.jpg HTTP/1.1" 304 Not Modified
+INFO:     183.95.249.136:0 - "GET /uploads/processed/39e4aae9610044b59252564b5932ab38.jpg HTTP/1.1" 304 Not Modified
+INFO:     183.95.249.136:0 - "GET /uploads/processed/bbad32a6ef2647ecb34106ff8e971999.jpg HTTP/1.1" 304 Not Modified
+INFO:     183.95.249.136:0 - "GET /uploads/processed/129225d25e884f76bef864055cd47dda.jpg HTTP/1.1" 304 Not Modified
+INFO:     183.95.249.136:0 - "GET /uploads/processed/0e3cadd6ecad41669ce595c15c221f67.jpg HTTP/1.1" 304 Not Modified
+INFO:     183.95.249.136:0 - "GET /uploads/processed/c8e3068beb954e92b22793fd86cb0395.jpg HTTP/1.1" 304 Not Modified
+INFO:     183.95.249.136:0 - "POST /api/recommendations/outfit HTTP/1.1" 200 OK
+INFO:     43.139.238.192:0 - "GET /style HTTP/1.1" 200 OK
+INFO:     43.139.238.192:0 - "GET /assets/index-DJ_rOrDC.js HTTP/1.1" 200 OK
+INFO:     43.139.238.192:0 - "GET /assets/index-CPMyxe01.css HTTP/1.1" 200 OK
+INFO:     43.139.238.192:0 - "GET /logo.png HTTP/1.1" 200 OK
+INFO:     43.139.238.192:0 - "GET /api/clothes HTTP/1.1" 200 OK
+INFO:     43.139.238.192:0 - "GET /uploads/processed/04dfca7aa82f4ab49503d22ce1304d92.jpg HTTP/1.1" 200 OK
+INFO:     43.139.238.192:0 - "GET /uploads/processed/264f096a59b245688f3bdf946a449b87.jpg HTTP/1.1" 200 OK
+INFO:     43.139.238.192:0 - "GET /uploads/processed/95427b58d8b14bd187445698220f94d1.jpg HTTP/1.1" 200 OK
+INFO:     43.139.238.192:0 - "GET /uploads/processed/78d47db8c57747c086e1b00c37cc338b.jpg HTTP/1.1" 200 OK
+INFO:     43.139.238.192:0 - "GET /uploads/processed/de1b63fd80b8462eac19b6ff2e14d566.jpg HTTP/1.1" 200 OK
+INFO:     43.139.238.192:0 - "GET /uploads/processed/437aa4496bbe48e2877b9712af1f45ab.jpg HTTP/1.1" 200 OK
+INFO:     43.139.238.192:0 - "GET /uploads/processed/bcc937261ac14e5780743a63b4733aea.jpg HTTP/1.1" 200 OK
+INFO:     43.139.238.192:0 - "GET /uploads/processed/7f64bbe23c9b4657a498546eae637d10.jpg HTTP/1.1" 200 OK
+INFO:     43.139.238.192:0 - "GET /uploads/processed/c53a015c57cc4ec296c9cdf872f342a0.jpg HTTP/1.1" 200 OK
+INFO:     43.139.238.192:0 - "GET /uploads/processed/e89cee060be64f4dabc4e73d62a6e177.jpg HTTP/1.1" 200 OK
+INFO:     43.139.238.192:0 - "GET /uploads/processed/03c7e6f0444a4be5a220af1e5ace3970.jpg HTTP/1.1" 200 OK
+INFO:     43.139.238.192:0 - "GET /uploads/processed/5e02e02247954b8481a304f77817adf2.jpg HTTP/1.1" 200 OK
+INFO:     43.139.238.192:0 - "GET /uploads/processed/129225d25e884f76bef864055cd47dda.jpg HTTP/1.1" 200 OK
+INFO:     43.139.238.192:0 - "GET /uploads/processed/0e3cadd6ecad41669ce595c15c221f67.jpg HTTP/1.1" 200 OK
+INFO:     43.139.238.192:0 - "GET /uploads/processed/a56320d0635a44df9a64207f72a8c462.jpg HTTP/1.1" 200 OK
+INFO:     43.139.238.192:0 - "GET /uploads/processed/39e4aae9610044b59252564b5932ab38.jpg HTTP/1.1" 200 OK
+INFO:     43.139.238.192:0 - "GET /uploads/processed/c48ddd7dbe184ebcb45d08aad0b2f52c.jpg HTTP/1.1" 200 OK
+INFO:     43.139.238.192:0 - "GET /uploads/processed/c8e3068beb954e92b22793fd86cb0395.jpg HTTP/1.1" 200 OK
+INFO:     43.139.238.192:0 - "GET /uploads/processed/a7f3829cfd394ec9abc0a6cbbfa06473.jpg HTTP/1.1" 200 OK
+INFO:     43.139.238.192:0 - "GET /uploads/processed/bbad32a6ef2647ecb34106ff8e971999.jpg HTTP/1.1" 200 OK
