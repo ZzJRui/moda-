@@ -11,5 +11,6 @@ pytest
 httpx
 
 # 图片处理（Phase 2.2）：rembg 抠图，Pillow 白底合成。
-# 用 [cpu] extras 锁定 onnxruntime CPU 后端；首次调用时自动下载 u2net 模型到 ~/.rembg/。
-rembg[cpu]
+# ⚠️ 生产部署默认不装 rembg（onnxruntime ~18MB + 首次下载 u2net 模型 176MB，国内构建极慢）。
+# 想启用抠图：设环境变量 REMBG_ENABLED=true 重新构建，并配合 IMAGE_PROCESSING_ENABLED=true。
+# rembg[cpu]
