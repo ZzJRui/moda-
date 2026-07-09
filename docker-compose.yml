@@ -3,7 +3,11 @@
 # 架构：单容器，FastAPI 同时服务 API + 前端 SPA + /uploads 静态图片
 services:
   ai-closet:
-    build: .
+    build:
+      context: .
+      args:
+        # 默认 false 不装 rembg；要抠图必须设 true，构建时会装 rembg[cpu]（onnxruntime ~18MB）
+        REMBG_ENABLED: "true"
     image: ai-closet:latest
     container_name: ai-closet
     restart: unless-stopped
