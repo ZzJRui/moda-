@@ -1,0 +1,163 @@
+/* AI 搭配主页样式 — CSS Modules */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--bg);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4) 0;
+  flex-shrink: 0;
+}
+
+.headerSpacer {
+  width: 72px;
+}
+
+.headerTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ink-strong);
+  letter-spacing: -0.3px;
+}
+
+.headerRight {
+  width: 72px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.saveBtn {
+  border: none;
+  background: var(--bg-muted);
+  color: var(--text-disabled);
+  font-size: 13px;
+  font-weight: 500;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+  cursor: not-allowed;
+  transition:
+    background-color var(--dur-base) var(--ease-out),
+    color var(--dur-base) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+}
+
+.saveBtnActive {
+  background: var(--brand);
+  color: #fff;
+  cursor: pointer;
+}
+
+.saveBtnActive:active {
+  transform: scale(0.94);
+}
+
+/* Scroll area */
+.scrollArea {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
+}
+
+.captureWrap {
+  background: var(--bg);
+  padding: var(--space-6) 0 var(--space-2);
+}
+
+/* FAB */
+.fab {
+  position: absolute;
+  right: var(--space-4);
+  bottom: 80px;
+  height: 44px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-pill);
+  background: var(--brand);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(255, 92, 51, 0.35);
+  z-index: 10;
+}
+
+.fabIcon {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+/* Animation overlay */
+.animOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.85);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+}
+
+.animSpinner {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.animDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--brand);
+  animation: fadeInUp 0.6s ease-in-out infinite alternate;
+}
+
+.animDotDelay1 {
+  animation-delay: 0.2s;
+}
+
+.animDotDelay2 {
+  animation-delay: 0.4s;
+}
+
+.animText {
+  font-size: 14px;
+  color: var(--text);
+  font-weight: 500;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animDot {
+    animation: none;
+  }
+  .saveBtn {
+    transition: none;
+  }
+  .saveBtnActive:active {
+    transform: none;
+  }
+}

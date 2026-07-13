@@ -1,0 +1,289 @@
+/* 衣柜页样式 — CSS Modules 迁移样板（DESIGN.md §2.2）
+   颜色/间距/圆角全部走 index.css 令牌，间距对齐 8/16/32 节奏 */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--bg);
+}
+
+.scrollArea {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Profile Section */
+.profileSection {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) var(--space-4) var(--space-2);
+}
+
+.profileLeft {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.profileInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-pill);
+  background: #8b7355;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.userName {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.2;
+}
+
+.userHandle {
+  font-size: 13px;
+  color: var(--text-3);
+  line-height: 1.2;
+}
+
+/* Search + Action Row */
+.actionRow {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-4) var(--space-3);
+}
+
+.searchBar {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: 40px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-muted);
+  padding: 0 var(--space-3);
+  color: var(--text-disabled);
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+
+.searchBar:focus-within {
+  background: var(--bg);
+  box-shadow: inset 0 0 0 1.5px var(--brand);
+}
+
+.searchInput {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 14px;
+  color: var(--text);
+  min-width: 0;
+}
+
+/* Empty State */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6) var(--space-5);
+  flex: 1;
+}
+
+.collageWrap {
+  margin-bottom: var(--space-5);
+  opacity: 0.85;
+}
+
+.emptyTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  text-align: center;
+  margin-bottom: var(--space-1);
+}
+
+.emptySub {
+  font-size: 13px;
+  color: var(--text-3);
+  text-align: center;
+}
+
+/* Grid */
+.gridContainer {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-4) var(--space-4);
+}
+
+.gridCard {
+  border-radius: var(--radius-m);
+  overflow: hidden;
+  background: var(--bg-subtle);
+  cursor: pointer;
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+
+.gridCard:hover {
+  box-shadow: var(--shadow-1);
+}
+
+.gridCard:active {
+  transform: scale(0.975);
+}
+
+.gridImage {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  display: block;
+}
+
+.gridPlaceholder {
+  width: 100%;
+  height: 140px;
+  background: var(--bg-muted);
+  color: var(--text-disabled);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gridFooter {
+  padding: var(--space-2) var(--space-3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.gridName {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gridTag {
+  font-size: 11px;
+  color: var(--text-3);
+  background: var(--bg-muted);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-s);
+  flex-shrink: 0;
+}
+
+/* Detail View */
+.detailScroll {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.detailImageWrap {
+  width: 100%;
+  height: 360px;
+  overflow: hidden;
+  background: var(--bg-muted);
+}
+
+.detailImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.detailBody {
+  padding: var(--space-4);
+}
+
+.detailName {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 var(--space-3);
+}
+
+.detailTags {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.tagPrimary {
+  font-size: 12px;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--brand);
+  color: #fff;
+  font-weight: 500;
+}
+
+.tagOutline {
+  font-size: 12px;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-strong);
+  color: var(--text-2);
+}
+
+.detailInfo {
+  background: var(--bg-subtle);
+  border-radius: var(--radius-m);
+  padding: var(--space-1) var(--space-4);
+}
+
+.infoRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--divider);
+}
+
+.infoRow:last-child {
+  border-bottom: none;
+}
+
+.infoLabel {
+  font-size: 14px;
+  color: var(--text-3);
+}
+
+.infoValue {
+  font-size: 14px;
+  color: var(--text);
+  font-weight: 500;
+}
+
+.deleteBtn {
+  margin-top: var(--space-4);
+  --border-color: var(--danger);
+}

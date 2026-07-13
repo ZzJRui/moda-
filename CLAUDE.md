@@ -288,12 +288,19 @@ src/
     outfits.ts             # 保存穿搭
     recommendations.ts     # AI 推荐
     favorites.ts           # 收藏截图上传与列表
+  ui/                      # Moda 内部组件库（唯一 UI 入口，见 DESIGN.md）
+    icons/Icon.tsx         # 图标注册表 + Icon 组件（currentColor）
+    toast.ts               # showToast（替代 React 19 下失效的 Toast.show）
+    AsyncState / PageHeader / IconButton
+    antd.ts                # antd-mobile 收编再导出层（不导出 Toast）
+    index.ts               # barrel，flows 只从这里 import
   flows/
     ai-closet/             # AppShell、底部导航、上传胶囊 / 气泡菜单
     ai-styling/            # 首页 StylingHome + Hero + 三组老虎机 + 对话
     upload/                # 上传抽屉
-    closet/                # 衣柜列表
-    favorites/             # 收藏双列
+    closet/                # 衣柜列表（CSS Modules 迁移样板）
+    favorites/             # 收藏双列（"搭配详情"视图视觉冻结）
+    design/                # /design 组件库活体展示页
     shared/                # image-url / mappers / types，跨 flow 复用
   utils/device.ts          # 设备信息
   assets/  public/         # 静态资源
@@ -301,12 +308,34 @@ src/
 
 ## 前端开发约定
 
-- UI 组件统一用 antd-mobile v5（Swiper、Popup、NavBar、Toast、SafeArea 等），不再引入 Tailwind CSS。
+**设计规范单一来源是 `frontend/DESIGN.md`**（令牌语义、间距节奏、组件库规则），活体展示页在 `/design` 路由。UI 改动先对照 DESIGN.md，新组件必须登记到展示页。
+
+- **组件库 `src/ui/`（包装收编策略）**：业务代码（`src/flows/`）不得直接 `import 'antd-mobile'`，一律从 `src/ui` 引入（`ui/antd.ts` 是收编再导出层）。图标一律 `<Icon name="..."/>`（`ui/icons/Icon.tsx` 注册表），禁止在 flow 里手写 `<svg>` 图标（页面级插画除外）。
+- **Toast**：一律用 `ui/toast.ts` 的 `showToast()`。antd-mobile 命令式 `Toast.show` 在 React 19 下静默失效，已禁止（`ui/antd.ts` 刻意不导出 Toast）。
+- **样式载体**：新代码/迁移用 CSS Modules（`xxx.module.css`，类名 camelCase，颜色间距圆角全走 `var(--xxx)` 令牌）。`closet` flow 是迁移样板；其余 flow 的巨型 `S` inline-style 对象是待迁移遗留，禁止新增。迁移状态表见 DESIGN.md §6。
+- **三态**：loading/error/empty 一律 `<AsyncState>`；页头一律 `<PageHeader>`。
+- **视觉冻结区**：收藏页"搭配详情"视图（favorites 的 `selectedDetail` 分支）只许结构重构，观感不许变。
+- UI 组件底座为 antd-mobile v5（Swiper、Popup、NavBar、SafeArea 等，经 `ui/antd.ts` 收编），不再引入 Tailwind CSS。
 - 动画走 framer-motion（Hero、弹簧过渡）。
 - API 层：所有请求经 `api/client.ts` 的 `request<T>()`；错误统一抛 `ApiError`，UI 层用 `err.message` 直接 Toast 即可。
 - BASE URL：开发默认 `window.location.origin`（同源）或 `VITE_API_BASE_URL`。若前后端跨端口开发，需要在 `.env.local` 里配置 `VITE_API_BASE_URL=http://127.0.0.1:8000`，或在 `vite.config.ts` 加 `server.proxy`（当前 vite.config 未设代理）。
 - 静态图片 URL：后端返回的 `original_image_path` / `processed_image_path` 是相对路径，前端在 `flows/shared/image-url.ts` 里拼接 `getApiBaseUrl()` 展示。
 - 优先接真实后端，不再依赖前端 mock；后端接口已完全可用。
+
+### 设计令牌与动效（`src/index.css`）
+
+- 颜色/圆角/阴影/动效时长统一定义在 `src/index.css` 的 `:root` 设计令牌里，组件内联样式引用 `var(--xxx)`，**不再新增硬编码色值**（SVG 插画/图标的 attribute 色除外，var() 在 SVG 属性里无效）。
+- 品牌主色是活力橙红 `--brand`(#ff5c33)（另有 `--brand-press/--brand-bg`），用于主操作按钮、FAB、激活态 Tab 图标、用户气泡等；标题/正文仍用黑 `--ink`(#111)/`--ink-strong`(#000)。文字灰阶 `--text/--text-2/--text-3/--text-disabled`，背景 `--bg/--bg-subtle/--bg-muted`，边框 `--divider/--border/--border-strong`，语义色 `--danger/--success/--warning`（对齐 antd-mobile 色板）。
+- antd-mobile 主题已通过 `:root:root { --adm-color-primary: var(--brand); ... }` 全局对齐品牌色，`color="primary"` 的组件自动跟随，不要再为单个组件改色。
+- 底部 Tab 图标用 `stroke="currentColor"`/`fill="currentColor"` 画，激活态由父级 `color: var(--brand)` 统一填色（SVG 属性里不能直接写 var()，currentColor 是桥梁），激活时经 framer-motion 弹跳一次（见 `NavTab`）。
+- 交互反馈用 index.css 里的工具类，不要在组件里重复写 transition：
+  - `.pressable`：小控件按压缩放（按钮、tab、图标）；
+  - `.card-press`：卡片按压 + hover 阴影；
+  - `.focus-ring`：输入框/搜索框聚焦描边；
+  - `.empty-slot-hover`：虚线空槽 hover。
+  - framer-motion 元素用 `whileTap={{ scale: 0.9x }}` 代替。
+  - 已带 `prefers-reduced-motion` 降级，新动效也要遵守。
+- 开发种子数据：`backend/seed_demo.py` 从仓库根 `衣橱/` 样例图向数据库种入三品类单品（可重复执行）。前后端跨端口联调时前端 `.env.local` 配 `VITE_API_BASE_URL`，后端启动时用 `CORS_ORIGINS` 环境变量放行对应端口。
 
 ## 约定
 

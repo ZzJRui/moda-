@@ -1,0 +1,60 @@
+/* 上传气泡菜单样式 — CSS Modules */
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 19;
+}
+
+.hiddenInput {
+  display: none;
+}
+
+/* Desktop: centered above the "+" button */
+.bubbleCenter {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 76px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  z-index: 21;
+}
+
+/* Mobile: left bubble */
+.bubbleLeft {
+  position: absolute;
+  right: 56px;
+  bottom: 76px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  z-index: 21;
+}
+
+/* Mobile: right bubble */
+.bubbleRight {
+  position: absolute;
+  left: 56px;
+  bottom: 76px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  z-index: 21;
+}
+
+.iconCircle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--bg);
+  color: var(--text-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-2);
+}

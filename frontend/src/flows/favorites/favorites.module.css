@@ -1,0 +1,235 @@
+/* 收藏页样式 — CSS Modules
+   注意：frozen* 前缀 + detail/thumb/reason/source 系列是"搭配详情"视觉冻结区（DESIGN.md §5），
+   数值 1:1 保留自迁移前的 inline style，不许按令牌节奏改动 */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--bg-muted);
+  position: relative;
+}
+
+/* ============ 冻结区：搭配详情 ============ */
+
+.frozenHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px 8px;
+  flex-shrink: 0;
+  background: var(--bg);
+}
+
+.frozenHeaderSpacer {
+  width: 80px;
+}
+
+.frozenHeaderTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ink-strong);
+  letter-spacing: -0.3px;
+}
+
+.frozenBackBtn {
+  width: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--ink-strong);
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    opacity var(--dur-fast) var(--ease-out);
+}
+
+.frozenBackBtn:active {
+  transform: scale(0.94);
+  opacity: 0.8;
+}
+
+.detailScroll {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  background: var(--bg);
+}
+
+.detailImage {
+  display: block;
+  background: var(--bg-subtle);
+}
+
+.detailBody {
+  padding: 16px;
+}
+
+.detailMeta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.sourceTag {
+  font-size: 12px;
+}
+
+.detailDate {
+  font-size: 13px;
+  color: var(--text-3);
+}
+
+.reasonBlock {
+  background: var(--bg-subtle);
+  border-radius: var(--radius-m);
+  padding: 12px;
+  margin-bottom: 16px;
+}
+
+.reasonText {
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--text);
+  margin: 0;
+}
+
+.itemThumbnails {
+  margin-top: 8px;
+}
+
+.thumbLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+
+.thumbRow {
+  display: flex;
+  gap: 12px;
+}
+
+.thumbCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.thumbImage {
+  border-radius: 8px;
+}
+
+.thumbName {
+  font-size: 11px;
+  color: var(--text);
+  text-align: center;
+  max-width: 64px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.thumbCategoryTag {
+  font-size: 10px;
+}
+
+/* ============ 列表视图（非冻结，走令牌节奏） ============ */
+
+.overlayLoading {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.scrollWrap {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.gridContainer {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-3) 80px;
+}
+
+.gridCard {
+  border-radius: var(--radius-m);
+  overflow: hidden;
+  background: var(--bg);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+
+.gridCard:hover {
+  box-shadow: var(--shadow-1);
+}
+
+.gridCard:active {
+  transform: scale(0.975);
+}
+
+.gridImage {
+  display: block;
+  background: var(--bg-subtle);
+}
+
+.gridPlaceholder {
+  width: 100%;
+  height: 180px;
+  background: var(--bg-muted);
+  color: var(--text-disabled);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gridFooter {
+  padding: var(--space-2) var(--space-3);
+}
+
+.gridDate {
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+.emptyContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+  gap: var(--space-4);
+}
+
+.emptyCta {
+  min-height: 44px;
+  border-radius: var(--radius-pill);
+  min-width: 200px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .frozenBackBtn,
+  .gridCard {
+    transition: none;
+  }
+  .frozenBackBtn:active,
+  .gridCard:active {
+    transform: none;
+  }
+}
