@@ -1,0 +1,177 @@
+/* AppShell 样式 — CSS Modules
+   注意：appShell/phoneFrame/brandBar/bottomNav 元素上还挂着同名全局类
+   （app-shell / phone-frame / brand-bar / bottom-nav），index.css 的
+   移动端媒体查询依赖它们，勿删 */
+
+.appShell {
+  width: 100%;
+  height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e8e8e8;
+}
+
+.phoneFrame {
+  width: 100%;
+  max-width: 430px;
+  height: 100%;
+  max-height: 932px;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 24px rgba(0, 0, 0, 0.12);
+}
+
+.brandBar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4) var(--space-1);
+  flex-shrink: 0;
+}
+
+.brandLogo {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  border-radius: var(--space-1);
+}
+
+.brandName {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.3px;
+}
+
+.routeArea {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Bottom Navigation */
+.bottomNav {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  height: 64px;
+  flex-shrink: 0;
+  border-top: 1px solid var(--divider);
+  background: var(--bg);
+  padding: 0 var(--space-2);
+  position: relative;
+}
+
+.navItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  cursor: pointer;
+  padding: var(--space-1) var(--space-2);
+  flex: 1;
+  color: var(--text-3);
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+
+.navItem:active {
+  transform: scale(0.94);
+}
+
+.navItemActive {
+  color: var(--brand);
+}
+
+.navIconWrap {
+  display: flex;
+}
+
+.navLabel {
+  font-size: 10px;
+  font-weight: 600;
+  margin-top: 2px;
+  color: var(--brand);
+}
+
+/* Center gap - reserves space for floating + button */
+.centerGap {
+  width: 56px;
+  flex-shrink: 0;
+}
+
+/* Center + button */
+.centerPlus {
+  position: absolute;
+  left: 50%;
+  top: -16px;
+  transform: translateX(-50%);
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--brand);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(255, 92, 51, 0.4);
+  z-index: 10;
+}
+
+.centerPlusInner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Community placeholder */
+.communityPage {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--bg);
+}
+
+.communityBody {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.communityPlaceholder {
+  text-align: center;
+}
+
+.communityEmoji {
+  font-size: 48px;
+}
+
+.communityText {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text);
+  margin: var(--space-4) 0 var(--space-1);
+}
+
+.communitySubtext {
+  font-size: 13px;
+  color: var(--text-3);
+  margin: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .navItem {
+    transition: none;
+  }
+  .navItem:active {
+    transform: none;
+  }
+}

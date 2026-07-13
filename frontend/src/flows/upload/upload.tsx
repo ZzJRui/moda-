@@ -1,21 +1,22 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
-  NavBar,
   ActionSheet,
-  Image,
-  SpinLoading,
-  Result,
   Button,
-  Toast,
+  Image,
+  NavBar,
+  Result,
   SafeArea,
+  SpinLoading,
   Tag,
-} from 'antd-mobile'
+  showToast,
+} from '../../ui'
+import type { Action } from '../../ui'
 import { useNavigate } from 'react-router-dom'
-import type { Action } from 'antd-mobile/es/components/action-sheet'
 import type { ClothingCategory, ClothingItem } from '../shared/types'
 import { autoTagClothes, uploadClothes } from '../../api/clothes'
 import { ApiError } from '../../api/errors'
 import { isMobileBrowser } from '../../utils/device'
+import styles from './upload.module.css'
 
 /* -------------------------------------------------- */
 /*  Helpers                                           */
@@ -82,7 +83,7 @@ export function UploadSheet() {
     if (!file) return
     const err = validateFile(file)
     if (err) {
-      Toast.show({ content: err, position: 'bottom' })
+      showToast(err)
       return
     }
     if (preview) URL.revokeObjectURL(preview.url)
@@ -114,19 +115,12 @@ export function UploadSheet() {
       const item = await uploadClothes(preview.file)
       setUploaded(item)
       if (item.taggingStatus === 'ai_failed') {
-        Toast.show({
-          content: 'AI 识别失败，已按默认标签保存，可在下方重新识别',
-          position: 'bottom',
-        })
+        showToast('AI 识别失败，已按默认标签保存，可在下方重新识别')
       } else {
-        Toast.show({ icon: 'success', content: '上传成功', position: 'bottom' })
+        showToast('上传成功')
       }
     } catch (err) {
-      if (err instanceof ApiError) {
-        Toast.show({ content: err.message, position: 'bottom' })
-      } else {
-        Toast.show({ content: '上传失败，请重试', position: 'bottom' })
-      }
+      showToast(err instanceof ApiError ? err.message : '上传失败，请重试')
     } finally {
       setUploading(false)
     }
@@ -138,13 +132,9 @@ export function UploadSheet() {
     try {
       const updated = await autoTagClothes(uploaded.id)
       setUploaded(updated)
-      Toast.show({ icon: 'success', content: '重新识别成功', position: 'bottom' })
+      showToast('重新识别成功')
     } catch (err) {
-      if (err instanceof ApiError) {
-        Toast.show({ content: err.message, position: 'bottom' })
-      } else {
-        Toast.show({ content: '重新识别失败', position: 'bottom' })
-      }
+      showToast(err instanceof ApiError ? err.message : '重新识别失败')
     } finally {
       setRetagging(false)
     }
@@ -172,8 +162,8 @@ export function UploadSheet() {
   }
 
   return (
-    <div style={styles.page}>
-      <NavBar onBack={handleBack} style={styles.navBar}>
+    <div className={styles.page}>
+      <NavBar onBack={handleBack} className={styles.navBar}>
         {'上传衣物'}
       </NavBar>
 
@@ -184,7 +174,7 @@ export function UploadSheet() {
           type="file"
           accept="image/*"
           capture="environment"
-          style={{ display: 'none' }}
+          className={styles.hiddenInput}
           onChange={(e) => handleFileChosen(e.target.files?.[0])}
         />
       )}
@@ -192,11 +182,11 @@ export function UploadSheet() {
         ref={galleryInputRef}
         type="file"
         accept="image/*"
-        style={{ display: 'none' }}
+        className={styles.hiddenInput}
         onChange={(e) => handleFileChosen(e.target.files?.[0])}
       />
 
-      <div style={styles.content}>
+      <div className={styles.content}>
         <ActionSheet
           visible={sheetVisible && !preview}
           actions={actions}
@@ -209,26 +199,26 @@ export function UploadSheet() {
 
         {/* 预览 + 开始上传 */}
         {preview && !uploading && !uploaded && (
-          <div style={styles.imageSelectedPanel}>
-            <div style={styles.previewContainer}>
+          <div className={styles.imageSelectedPanel}>
+            <div className={styles.previewContainer}>
               <Image
                 src={preview.url}
                 width={200}
                 height={200}
                 fit="cover"
-                style={styles.previewImage}
+                className={styles.previewImage}
               />
             </div>
-            <div style={styles.detectedInfo}>
-              <span style={styles.detectedLabel}>{'点击开始上传后 AI 会自动识别'}</span>
+            <div className={styles.detectedInfo}>
+              <span className={styles.detectedLabel}>{'点击开始上传后 AI 会自动识别'}</span>
             </div>
-            <div style={styles.actionButtons}>
+            <div className={styles.actionButtons}>
               <Button
                 block
                 fill="none"
                 size="large"
                 onClick={handleContinue}
-                style={styles.reselectBtn}
+                className={styles.outlinePillBtn}
               >
                 {'重新选择'}
               </Button>
@@ -237,7 +227,7 @@ export function UploadSheet() {
                 color="primary"
                 size="large"
                 onClick={handleStartUpload}
-                style={styles.uploadBtn}
+                className={styles.pillBtn}
               >
                 {'开始上传'}
               </Button>
@@ -247,16 +237,16 @@ export function UploadSheet() {
 
         {/* 上传中 */}
         {uploading && (
-          <div style={styles.uploadingPanel}>
-            <SpinLoading color="primary" style={styles.spinner} />
-            <p style={styles.uploadingText}>{'正在上传并识别衣物...'}</p>
-            <p style={styles.uploadingHint}>{'AI 识别可能需要几秒钟'}</p>
+          <div className={styles.uploadingPanel}>
+            <SpinLoading color="primary" className={styles.spinner} />
+            <p className={styles.uploadingText}>{'正在上传并识别衣物...'}</p>
+            <p className={styles.uploadingHint}>{'AI 识别可能需要几秒钟'}</p>
           </div>
         )}
 
         {/* 上传成功 */}
         {uploaded && (
-          <div style={styles.successPanel}>
+          <div className={styles.successPanel}>
             <Result
               status={uploaded.taggingStatus === 'ai_failed' ? 'warning' : 'success'}
               title={uploaded.taggingStatus === 'ai_failed' ? '已保存，AI 识别失败' : '上传成功'}
@@ -267,26 +257,26 @@ export function UploadSheet() {
               }
             />
 
-            <div style={styles.tagsBlock}>
-              <div style={styles.tagRow}>
-                <span style={styles.tagLabel}>{'品类：'}</span>
-                <Tag color="primary" style={styles.detectedTag}>
+            <div className={styles.tagsBlock}>
+              <div className={styles.tagRow}>
+                <span className={styles.tagLabel}>{'品类：'}</span>
+                <Tag color="primary" className={styles.detectedTag}>
                   {categoryLabel[uploaded.category]}
                 </Tag>
                 {uploaded.subtype && (
-                  <Tag color="default" style={styles.detectedTag}>{uploaded.subtype}</Tag>
+                  <Tag color="default" className={styles.detectedTag}>{uploaded.subtype}</Tag>
                 )}
               </div>
               {uploaded.colorBase && (
-                <div style={styles.tagRow}>
-                  <span style={styles.tagLabel}>{'颜色：'}</span>
-                  <Tag color="default" style={styles.detectedTag}>{uploaded.colorBase}</Tag>
+                <div className={styles.tagRow}>
+                  <span className={styles.tagLabel}>{'颜色：'}</span>
+                  <Tag color="default" className={styles.detectedTag}>{uploaded.colorBase}</Tag>
                 </div>
               )}
               {uploaded.style && uploaded.style !== 'unknown' && (
-                <div style={styles.tagRow}>
-                  <span style={styles.tagLabel}>{'风格：'}</span>
-                  <Tag color="default" style={styles.detectedTag}>{uploaded.style}</Tag>
+                <div className={styles.tagRow}>
+                  <span className={styles.tagLabel}>{'风格：'}</span>
+                  <Tag color="default" className={styles.detectedTag}>{uploaded.style}</Tag>
                 </div>
               )}
             </div>
@@ -298,19 +288,19 @@ export function UploadSheet() {
                 size="middle"
                 loading={retagging}
                 onClick={handleRetag}
-                style={styles.retagBtn}
+                className={styles.pillBtn}
               >
                 {'重新识别'}
               </Button>
             )}
 
-            <div style={styles.successActions}>
+            <div className={styles.successActions}>
               <Button
                 block
                 fill="none"
                 size="large"
                 onClick={handleContinue}
-                style={styles.continueBtn}
+                className={styles.outlinePillBtn}
               >
                 {'继续上传'}
               </Button>
@@ -319,7 +309,7 @@ export function UploadSheet() {
                 color="primary"
                 size="large"
                 onClick={handleViewCloset}
-                style={styles.viewClosetBtn}
+                className={styles.pillBtn}
               >
                 {'查看衣柜'}
               </Button>
@@ -331,134 +321,4 @@ export function UploadSheet() {
       <SafeArea position="bottom" />
     </div>
   )
-}
-
-/* -------------------------------------------------- */
-/*  Styles                                            */
-/* -------------------------------------------------- */
-
-const styles: Record<string, React.CSSProperties> = {
-  page: {
-    display: 'flex',
-    flexDirection: 'column',
-    height: '100%',
-    background: 'var(--adm-color-background, #f5f5f5)',
-  },
-  navBar: {
-    flexShrink: 0,
-    borderBottom: '1px solid var(--adm-color-border, #eee)',
-    fontWeight: 600,
-  },
-  content: {
-    flex: 1,
-    overflowY: 'auto',
-    WebkitOverflowScrolling: 'touch',
-  },
-  imageSelectedPanel: {
-    padding: 24,
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: 20,
-  },
-  previewContainer: {
-    borderRadius: 16,
-    overflow: 'hidden',
-    border: '1px solid var(--adm-color-border, #eee)',
-  },
-  previewImage: {
-    display: 'block',
-    borderRadius: 16,
-  },
-  detectedInfo: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 8,
-  },
-  detectedLabel: {
-    fontSize: 14,
-    color: 'var(--adm-color-text, #333)',
-  },
-  detectedTag: {
-    fontSize: 13,
-    marginRight: 6,
-  },
-  actionButtons: {
-    width: '100%',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 12,
-    marginTop: 8,
-  },
-  reselectBtn: {
-    minHeight: 44,
-    borderRadius: 8,
-    border: '1px solid var(--adm-color-border, #ddd)',
-  },
-  uploadBtn: {
-    minHeight: 44,
-    borderRadius: 8,
-  },
-  uploadingPanel: {
-    padding: 48,
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: 20,
-  },
-  spinner: {
-    '--size': '48px',
-  } as React.CSSProperties,
-  uploadingText: {
-    fontSize: 15,
-    color: 'var(--adm-color-text, #333)',
-    margin: 0,
-  },
-  uploadingHint: {
-    fontSize: 12,
-    color: 'var(--adm-color-weak, #999)',
-    margin: 0,
-  },
-  successPanel: {
-    padding: '32px 24px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 20,
-  },
-  tagsBlock: {
-    padding: '16px 20px',
-    background: '#fff',
-    borderRadius: 12,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 12,
-  },
-  tagRow: {
-    display: 'flex',
-    alignItems: 'center',
-    flexWrap: 'wrap' as const,
-    gap: 6,
-  },
-  tagLabel: {
-    fontSize: 14,
-    color: '#666',
-    minWidth: 44,
-  },
-  retagBtn: {
-    borderRadius: 8,
-  },
-  successActions: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 12,
-  },
-  continueBtn: {
-    minHeight: 44,
-    borderRadius: 8,
-    border: '1px solid var(--adm-color-border, #ddd)',
-  },
-  viewClosetBtn: {
-    minHeight: 44,
-    borderRadius: 8,
-  },
 }

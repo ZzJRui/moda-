@@ -1,0 +1,35 @@
+/* 上传进度胶囊样式 — CSS Modules */
+
+.capsule {
+  position: absolute;
+  top: var(--space-3);
+  left: var(--space-4);
+  right: var(--space-4);
+  background: var(--bg);
+  border-radius: var(--radius-l);
+  padding: 10px var(--space-4) var(--space-2);
+  box-shadow: var(--shadow-2);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.text {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.track {
+  height: 3px;
+  border-radius: 2px;
+  background: var(--divider);
+  overflow: hidden;
+}
+
+.bar {
+  height: 100%;
+  border-radius: 2px;
+}

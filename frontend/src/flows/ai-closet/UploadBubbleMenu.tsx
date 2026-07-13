@@ -1,6 +1,8 @@
 import { useRef, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { Icon } from '../../ui'
 import { isMobileBrowser } from '../../utils/device'
+import styles from './UploadBubbleMenu.module.css'
 
 /* -------------------------------------------------- */
 /*  Types                                              */
@@ -13,37 +15,6 @@ export interface UploadBubbleMenuProps {
 }
 
 /* -------------------------------------------------- */
-/*  SVG Icons                                          */
-/* -------------------------------------------------- */
-
-function GalleryIcon() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="3" width="18" height="18" rx="3" />
-      <circle cx="8.5" cy="8.5" r="1.5" fill="#555" stroke="none" />
-      <path d="M21 15l-5-5L5 21" />
-    </svg>
-  )
-}
-
-function CameraIcon() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
-      <circle cx="12" cy="13" r="4" />
-    </svg>
-  )
-}
-
-function FolderIcon() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
-    </svg>
-  )
-}
-
-/* -------------------------------------------------- */
 /*  Animation                                          */
 /* -------------------------------------------------- */
 
@@ -51,6 +22,7 @@ const bubbleVariants = {
   hidden: { opacity: 0, scale: 0.3, y: 8 },
   visible: { opacity: 1, scale: 1, y: 0 },
   exit: { opacity: 0, scale: 0.3, y: 8 },
+  tap: { scale: 0.88 },
 }
 
 const bubbleTransition = {
@@ -80,7 +52,7 @@ export function UploadBubbleMenu({ isOpen, onClose, onFileSelected }: UploadBubb
         <>
           {/* Backdrop — catches outside clicks */}
           <motion.div
-            style={BS.backdrop}
+            className={styles.backdrop}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -93,7 +65,7 @@ export function UploadBubbleMenu({ isOpen, onClose, onFileSelected }: UploadBubb
             ref={galleryInputRef}
             type="file"
             accept="image/*"
-            style={{ display: 'none' }}
+            className={styles.hiddenInput}
             onChange={handleFile}
           />
           {isMobile && (
@@ -102,7 +74,7 @@ export function UploadBubbleMenu({ isOpen, onClose, onFileSelected }: UploadBubb
               type="file"
               accept="image/*"
               capture="environment"
-              style={{ display: 'none' }}
+              className={styles.hiddenInput}
               onChange={handleFile}
             />
           )}
@@ -110,16 +82,17 @@ export function UploadBubbleMenu({ isOpen, onClose, onFileSelected }: UploadBubb
           {/* Desktop: single "图库" bubble */}
           {!isMobile && (
             <motion.div
-              style={BS.bubbleCenter}
+              className={styles.bubbleCenter}
               variants={bubbleVariants}
               initial="hidden"
               animate="visible"
               exit="exit"
+              whileTap="tap"
               transition={bubbleTransition}
               onClick={() => galleryInputRef.current?.click()}
             >
-              <div style={BS.iconCircle}>
-                <GalleryIcon />
+              <div className={styles.iconCircle}>
+                <Icon name="gallery" size={22} strokeWidth={1.5} />
               </div>
             </motion.div>
           )}
@@ -128,30 +101,32 @@ export function UploadBubbleMenu({ isOpen, onClose, onFileSelected }: UploadBubb
           {isMobile && (
             <>
               <motion.div
-                style={BS.bubbleLeft}
+                className={styles.bubbleLeft}
                 variants={bubbleVariants}
                 initial="hidden"
                 animate="visible"
                 exit="exit"
+                whileTap="tap"
                 transition={{ ...bubbleTransition, delay: 0 }}
                 onClick={() => cameraInputRef.current?.click()}
               >
-                <div style={BS.iconCircle}>
-                  <CameraIcon />
+                <div className={styles.iconCircle}>
+                  <Icon name="camera" size={22} strokeWidth={1.5} />
                 </div>
               </motion.div>
 
               <motion.div
-                style={BS.bubbleRight}
+                className={styles.bubbleRight}
                 variants={bubbleVariants}
                 initial="hidden"
                 animate="visible"
                 exit="exit"
+                whileTap="tap"
                 transition={{ ...bubbleTransition, delay: 0.05 }}
                 onClick={() => galleryInputRef.current?.click()}
               >
-                <div style={BS.iconCircle}>
-                  <FolderIcon />
+                <div className={styles.iconCircle}>
+                  <Icon name="folder" size={22} strokeWidth={1.5} />
                 </div>
               </motion.div>
             </>
@@ -160,63 +135,4 @@ export function UploadBubbleMenu({ isOpen, onClose, onFileSelected }: UploadBubb
       )}
     </AnimatePresence>
   )
-}
-
-/* -------------------------------------------------- */
-/*  Styles                                             */
-/* -------------------------------------------------- */
-
-const BS: Record<string, React.CSSProperties> = {
-  backdrop: {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    zIndex: 19,
-  },
-  /* Desktop: centered above the "+" button */
-  bubbleCenter: {
-    position: 'absolute',
-    left: '50%',
-    transform: 'translateX(-50%)',
-    bottom: 76,
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    cursor: 'pointer',
-    zIndex: 21,
-  },
-  /* Mobile: left bubble */
-  bubbleLeft: {
-    position: 'absolute',
-    right: 56,
-    bottom: 76,
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    cursor: 'pointer',
-    zIndex: 21,
-  },
-  /* Mobile: right bubble */
-  bubbleRight: {
-    position: 'absolute',
-    left: 56,
-    bottom: 76,
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    cursor: 'pointer',
-    zIndex: 21,
-  },
-  iconCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: '50%',
-    background: '#fff',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    boxShadow: '0 2px 12px rgba(0,0,0,0.12)',
-  },
 }

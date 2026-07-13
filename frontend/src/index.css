@@ -1,53 +1,88 @@
+/* ================================================
+   Design tokens — 黑白极简品牌体系
+   所有组件内联样式引用这里的变量，不再散落硬编码
+   ================================================ */
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
+  /* Brand（品牌主色：活力橙红） */
+  --brand: #ff5c33;
+  --brand-press: #e64a24;
+  --brand-bg: rgba(255, 92, 51, 0.1);
+
+  /* Ink（标题/正文黑，非主题色） */
+  --ink: #111;
+  --ink-strong: #000;
+
+  /* 文字灰阶 */
+  --text: #333;
+  --text-2: #666;
+  --text-3: #999;
+  --text-disabled: #bbb;
+
+  /* 背景与边框灰阶 */
   --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+  --bg-subtle: #fafafa;
+  --bg-muted: #f5f5f5;
+  --divider: #f0f0f0;
+  --border: #eee;
+  --border-strong: #ddd;
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+  /* 语义色（对齐 antd-mobile 色板，单一来源） */
+  --danger: #ff3141;
+  --success: #00b578;
+  --warning: #ff8f1f;
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
+  /* 阴影 */
+  --shadow-1: 0 2px 12px rgba(0, 0, 0, 0.08);
+  --shadow-2: 0 4px 16px rgba(0, 0, 0, 0.14);
+  --shadow-3: 0 8px 28px rgba(0, 0, 0, 0.18);
+
+  /* 圆角 */
+  --radius-s: 8px;
+  --radius-m: 12px;
+  --radius-l: 16px;
+  --radius-pill: 999px;
+
+  /* 间距（4px 基，节奏：组内 8 / 组间 16 / 区块间 32~40，见 DESIGN.md） */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 40px;
+
+  /* 动效（分级：状态变化 fast / 弹层 base / 模态 modal） */
+  --dur-fast: 0.16s;
+  --dur-base: 0.25s;
+  --dur-modal: 0.3s;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'PingFang SC',
+    'Microsoft YaHei', sans-serif;
+
+  font: 16px/1.45 var(--sans);
+  letter-spacing: 0.1px;
+  color-scheme: light;
   color: var(--text);
   background: var(--bg);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
+/* antd-mobile 主题对齐品牌色（:root:root 提升优先级，官方推荐写法） */
+:root:root {
+  --adm-color-primary: var(--brand);
+  --adm-color-danger: var(--danger);
+  --adm-color-success: var(--success);
+  --adm-color-warning: var(--warning);
+  --adm-color-text: var(--text);
+  --adm-color-weak: var(--text-3);
+  --adm-color-light: var(--text-disabled);
+  --adm-color-border: var(--border);
+  --adm-color-background: var(--bg);
+  --adm-color-box: var(--bg-muted);
 }
 
 #root {
@@ -67,46 +102,13 @@ body {
 
 h1,
 h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
-}
-
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
+  font-weight: 600;
+  color: var(--ink-strong);
   margin: 0;
 }
 
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
-}
-
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+p {
+  margin: 0;
 }
 
 /* antd-mobile NavBar — unified with styling page header */
@@ -117,9 +119,58 @@ code {
 .adm-nav-bar-title {
   font-size: 20px;
   font-weight: 700;
-  color: #000;
+  color: var(--ink-strong);
   letter-spacing: -0.3px;
   padding: 0;
+}
+
+/* ================================================
+   可访问性
+   交互伪类（按压/hover/聚焦）已随 CSS Modules 迁移
+   进各组件的 .module.css，此处只留全局焦点环
+   ================================================ */
+
+/* 键盘可达性：焦点环 */
+:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+/* ================================================
+   Moda Toast（src/ui/toast.ts 自研，替代 React 19 下
+   失效的 antd-mobile 命令式 Toast.show）
+   ================================================ */
+.moda-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 96px;
+  transform: translateX(-50%);
+  padding: 10px 16px;
+  border-radius: var(--radius-s);
+  background: rgba(0, 0, 0, 0.75);
+  color: #fff;
+  font-size: 13px;
+  line-height: 1.4;
+  max-width: 80vw;
+  text-align: center;
+  z-index: 1000;
+  pointer-events: none;
+  animation: modaToastIn var(--dur-fast) var(--ease-out);
+}
+@keyframes modaToastIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .moda-toast {
+    animation: none;
+  }
 }
 
 /* Hide scrollbar globally — touch & wheel scrolling still work */

@@ -1,0 +1,194 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--bg);
+}
+
+.scroll {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: var(--space-4);
+}
+
+.intro {
+  font-size: 13px;
+  color: var(--text-3);
+  line-height: 1.6;
+  margin-bottom: var(--space-5);
+}
+
+.section {
+  margin-bottom: var(--space-6);
+}
+
+.sectionTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0 0 var(--space-4);
+}
+
+/* 颜色 */
+.swatchGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3);
+}
+
+.swatch {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.swatchColor {
+  height: 40px;
+  border-radius: var(--radius-s);
+  border: 1px solid var(--border);
+}
+
+.swatchToken {
+  font-size: 11px;
+  color: var(--text-2);
+  font-family: ui-monospace, monospace;
+}
+
+.swatchLabel {
+  font-size: 11px;
+  color: var(--text-3);
+}
+
+/* 间距 */
+.spaceCol {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.spaceRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.spaceRow .swatchToken {
+  width: 80px;
+  flex-shrink: 0;
+}
+
+.spaceBar {
+  height: 16px;
+  background: var(--brand);
+  border-radius: 2px;
+}
+
+/* 圆角 / 阴影 */
+.radiusRow {
+  display: flex;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.radiusItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.radiusBox {
+  width: 56px;
+  height: 56px;
+  background: var(--bg-muted);
+  border: 1px solid var(--border-strong);
+}
+
+.shadowBox {
+  width: 56px;
+  height: 56px;
+  background: var(--bg);
+  border-radius: var(--radius-m);
+}
+
+/* 图标 */
+.iconGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.iconCell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2);
+  border-radius: var(--radius-s);
+  background: var(--bg-subtle);
+  color: var(--text);
+}
+
+.iconCellBrand {
+  color: var(--brand);
+}
+
+.iconName {
+  font-size: 10px;
+  color: var(--text-3);
+  font-family: ui-monospace, monospace;
+  text-align: center;
+  word-break: break-all;
+}
+
+/* 组件 demo */
+.demoRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-3);
+}
+
+.pillPrimary {
+  font-size: 12px;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--brand);
+  color: #fff;
+  font-weight: 500;
+}
+
+.pillOutline {
+  font-size: 12px;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-strong);
+  color: var(--text-2);
+}
+
+.headerDemo {
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-m);
+  overflow: hidden;
+}
+
+.asyncDemo {
+  min-height: 160px;
+  display: flex;
+  flex-direction: column;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-m);
+}
+
+.asyncDone {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+  font-size: 14px;
+  color: var(--success);
+}
