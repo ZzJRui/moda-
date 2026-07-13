@@ -29,7 +29,10 @@ DB_PATH: Path = DATA_DIR / "closet.db"
 DB_URL: str = f"sqlite:///{DB_PATH.as_posix()}"
 
 # 开发期允许的前端来源，可用环境变量 CORS_ORIGINS（逗号分隔）扩展
-_default_origins = "http://localhost:5173,http://127.0.0.1:5173"
+_default_origins = (
+    "http://localhost:5173,http://127.0.0.1:5173,"
+    "http://localhost:5174,http://127.0.0.1:5174"
+)
 CORS_ORIGINS: list[str] = [
     o.strip() for o in os.getenv("CORS_ORIGINS", _default_origins).split(",") if o.strip()
 ]
