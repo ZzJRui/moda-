@@ -72,6 +72,7 @@
 
 .searchBar {
   flex: 1;
+  min-width: 0; /* 允许在窄屏收缩，否则挤掉右侧图标钮 */
   display: flex;
   align-items: center;
   gap: var(--space-2);
