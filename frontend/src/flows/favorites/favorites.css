@@ -1,0 +1,25 @@
+.favorites-page { position: relative; display: flex; height: 100%; flex-direction: column; background: var(--moda-canvas); }
+.favorites-detail-scroll, .favorites-scroll-wrap { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.favorites-detail-image, .favorites-grid-image { display: block; background: var(--moda-surface-subtle); }
+.favorites-detail-body { padding: 16px; }
+.favorites-detail-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.favorites-source-tag { font-size: 12px; }
+.favorites-detail-date, .favorites-grid-date { color: var(--moda-muted); font-size: 13px; }
+.favorites-reason-block { margin-bottom: 16px; padding: 12px; border-radius: 8px; background: var(--moda-surface-subtle); }
+.favorites-reason-text { margin: 0; color: var(--moda-ink); font-size: 14px; line-height: 22px; }
+.favorites-item-thumbnails { margin-top: 8px; }
+.favorites-thumb-label { margin-bottom: 12px; color: var(--moda-ink); font-size: 14px; font-weight: 650; }
+.favorites-thumb-row { display: flex; gap: 12px; }
+.favorites-thumb-card { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.favorites-thumb-image { border-radius: 8px; }
+.favorites-thumb-name { max-width: 64px; overflow: hidden; color: var(--moda-ink); font-size: 11px; text-align: center; text-overflow: ellipsis; white-space: nowrap; }
+.favorites-thumb-category-tag { font-size: 10px; }
+.favorites-state, .favorites-empty-container { display: flex; flex: 1; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 32px; }
+.favorites-state-hint { color: var(--moda-muted); font-size: 13px; }
+.favorites-state-retry { margin-top: 12px; }
+.favorites-overlay-loading { position: absolute; inset: 60px 0 0; z-index: 10; display: flex; align-items: center; justify-content: center; background: rgb(255 255 255 / 70%); }
+.favorites-grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px 12px 80px; }
+.favorites-grid-card { padding: 0; overflow: hidden; border: 1px solid var(--moda-line); border-radius: 12px; background: var(--moda-surface); cursor: pointer; text-align: left; }
+.favorites-grid-placeholder { display: flex; width: 100%; height: 180px; align-items: center; justify-content: center; background: var(--moda-surface-subtle); color: var(--moda-subtle); }
+.favorites-grid-footer { padding: 8px 10px; }
+.favorites-grid-date { font-size: 12px; }

@@ -1,0 +1,42 @@
+.closet-page { display: flex; height: 100%; flex-direction: column; background: var(--moda-surface); }
+.closet-scroll-area, .closet-detail-scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.closet-profile { display: flex; flex-shrink: 0; align-items: center; justify-content: space-between; padding: 20px 20px 12px; }
+.closet-profile__left { display: flex; align-items: center; gap: 14px; }
+.closet-profile__info { display: flex; flex-direction: column; gap: 2px; }
+.closet-profile__spacer { min-height: 40px; flex: 1; }
+.closet-profile__avatar-wrap { position: relative; }
+.closet-profile__avatar { display: flex; width: 64px; height: 64px; align-items: center; justify-content: center; border-radius: 50%; background: var(--moda-ink); color: var(--moda-surface); }
+.closet-profile__name { color: var(--moda-ink); font-size: 18px; font-weight: 700; line-height: 1.2; }
+.closet-profile__handle { color: var(--moda-muted); font-size: 13px; line-height: 1.2; }
+.closet-action-row { display: flex; flex-shrink: 0; align-items: center; gap: 8px; padding: 16px 16px 12px; }
+.closet-search { display: flex; height: 40px; flex: 1; align-items: center; gap: 8px; padding: 0 14px; border-radius: 20px; background: var(--moda-surface-subtle); color: var(--moda-muted); }
+.closet-search__input { flex: 1; border: 0; outline: 0; background: transparent; color: var(--moda-ink); font-size: 14px; }
+.closet-search:focus-within { box-shadow: inset 0 0 0 1px var(--moda-ink); }
+.closet-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 48px 20px; color: var(--moda-muted); }
+.closet-state__hint { margin-top: 12px; color: var(--moda-muted); font-size: 13px; }
+.closet-state__retry { margin-top: 12px; }
+.closet-empty-state { display: flex; flex: 1; flex-direction: column; align-items: center; justify-content: center; padding: 32px 24px; }
+.closet-collage { margin-bottom: 24px; opacity: .85; filter: grayscale(1); }
+.closet-empty-state__title { margin-bottom: 6px; color: var(--moda-ink); font-size: 16px; font-weight: 650; text-align: center; }
+.closet-empty-state__description { color: var(--moda-muted); font-size: 13px; text-align: center; }
+.closet-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 4px 16px 16px; }
+.closet-grid__card { padding: 0; overflow: hidden; border: 0; border-radius: 12px; background: var(--moda-surface-subtle); cursor: pointer; text-align: left; }
+.closet-grid__image { display: block; width: 100%; height: 140px; object-fit: cover; }
+.closet-grid__placeholder { display: flex; width: 100%; height: 140px; align-items: center; justify-content: center; background: var(--moda-surface-subtle); color: var(--moda-subtle); }
+.closet-grid__footer { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; }
+.closet-grid__name { max-width: 65%; overflow: hidden; color: var(--moda-ink); font-size: 13px; font-weight: 550; text-overflow: ellipsis; white-space: nowrap; }
+.closet-grid__tag { padding: 2px 8px; border-radius: 4px; background: var(--moda-line); color: var(--moda-muted); font-size: 11px; }
+.closet-detail-image-wrap { width: 100%; height: 360px; overflow: hidden; background: var(--moda-surface-subtle); }
+.closet-detail-image { display: block; width: 100%; height: 100%; object-fit: cover; }
+.closet-detail-body { padding: 16px; }
+.closet-detail-name { margin: 0 0 12px; color: var(--moda-ink); font-size: 18px; font-weight: 650; }
+.closet-detail-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+.closet-detail-tag { padding: 4px 12px; border: 1px solid var(--moda-line-strong); border-radius: 14px; color: var(--moda-muted); font-size: 12px; }
+.closet-detail-tag--primary { border-color: var(--moda-ink); background: var(--moda-ink); color: var(--moda-surface); font-weight: 550; }
+.closet-detail-info { padding: 4px 16px; border-radius: 12px; background: var(--moda-surface-subtle); }
+.closet-info-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--moda-line); }
+.closet-info-row--last { border-bottom: 0; }
+.closet-info-label { color: var(--moda-muted); font-size: 14px; }
+.closet-info-value { color: var(--moda-ink); font-size: 14px; font-weight: 550; }
+.closet-detail-delete { --border-color: var(--moda-ink); margin-top: 20px; }
+.closet-flash-toast { position: fixed; bottom: 96px; left: 50%; z-index: 1000; padding: 10px 16px; border-radius: 8px; background: rgb(0 0 0 / 78%); color: var(--moda-surface); font-size: 13px; pointer-events: none; transform: translateX(-50%); }

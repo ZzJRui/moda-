@@ -1,0 +1,9 @@
+.clothing-carousel { margin-bottom: 8px; touch-action: pan-y; }
+.clothing-carousel--spinning { box-shadow: inset 0 0 0 1px var(--moda-line-strong); }
+.clothing-carousel .adm-swiper { scrollbar-width: none; -ms-overflow-style: none; }
+.clothing-carousel .adm-swiper::-webkit-scrollbar { display: none; }
+.clothing-carousel__slide { width: 100%; height: 100%; padding: 0 40px; }
+.clothing-carousel__image { display: block; width: 100%; height: 100%; border-radius: 12px; background: var(--moda-surface); object-fit: contain; }
+.clothing-carousel__empty { display: flex; height: var(--carousel-height); flex-direction: column; align-items: center; justify-content: center; margin: 0 12px; border: 1.5px dashed var(--moda-line-strong); border-radius: 12px; background: var(--moda-surface-subtle); }
+.clothing-carousel__empty-plus { margin-bottom: 4px; color: var(--moda-subtle); font-size: 28px; font-weight: 300; line-height: 1; }
+.clothing-carousel__empty-text { color: var(--moda-ink); font-size: 15px; font-weight: 550; letter-spacing: .02em; }

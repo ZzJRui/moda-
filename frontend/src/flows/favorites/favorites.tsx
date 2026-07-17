@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
-  Empty,
   Button,
   Image,
   Tag,
@@ -15,6 +14,9 @@ import type { Favorite, FavoriteDetail, ClothingItem } from '../shared/types'
 import { getFavorite, listFavorites } from '../../api/favorites'
 import { listClothes } from '../../api/clothes'
 import { ApiError } from '../../api/errors'
+import { Button as UiButton, EmptyState, Icon, PageHeader } from '@moda/ui'
+import { useDelayedBusy } from '../shared/useDelayedBusy'
+import './favorites.css'
 
 /* -------------------------------------------------- */
 /*  Helpers                                           */
@@ -53,6 +55,7 @@ export function FavoritesList() {
   // 详情
   const [selectedDetail, setSelectedDetail] = useState<FavoriteDetail | null>(null)
   const [detailLoading, setDetailLoading] = useState(false)
+  const showLoading = useDelayedBusy(loading)
 
   const fetchFavorites = useCallback(async () => {
     setLoading(true)
@@ -104,63 +107,55 @@ export function FavoritesList() {
     const outfitItems = [topItem, bottomItem, shoesItem].filter(Boolean) as ClothingItem[]
 
     return (
-      <div style={styles.page}>
-        <div style={styles.header}>
-          <button style={styles.backBtn} onClick={() => setSelectedDetail(null)}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="15 18 9 12 15 6" />
-            </svg>
-          </button>
-          <span style={styles.headerTitle}>{'搭配详情'}</span>
-          <div style={styles.headerSpacer} />
-        </div>
-        <div style={styles.detailScroll}>
+      <div className="favorites-page">
+        <PageHeader title="搭配详情" onBack={() => setSelectedDetail(null)} />
+        <div className="favorites-detail-scroll">
           <Image
             src={selectedDetail.screenshotPath}
             width="100%"
             height={520}
             fit="contain"
-            style={{ ...styles.detailImage, background: '#fafafa' }}
+            className="favorites-detail-image"
           />
 
-          <div style={styles.detailBody}>
-            <div style={styles.detailMeta}>
+          <div className="favorites-detail-body">
+            <div className="favorites-detail-meta">
               <Tag
                 color={outfit.source === 'ai' ? 'primary' : 'success'}
-                style={styles.sourceTag}
+                className="favorites-source-tag"
               >
                 {outfit.source === 'ai' ? 'AI 推荐' : '手动搭配'}
               </Tag>
-              <span style={styles.detailDate}>
+              <span className="favorites-detail-date">
                 {'保存于'} {formatDate(selectedDetail.createdAt)}
               </span>
             </div>
 
             {outfit.reason && (
-              <div style={styles.reasonBlock}>
-                <p style={styles.reasonText}>{outfit.reason}</p>
+              <div className="favorites-reason-block">
+                <p className="favorites-reason-text">{outfit.reason}</p>
               </div>
             )}
 
-            <div style={styles.itemThumbnails}>
-              <div style={styles.thumbLabel}>{'搭配单品'}</div>
-              <div style={styles.thumbRow}>
+            <div className="favorites-item-thumbnails">
+              <div className="favorites-thumb-label">{'搭配单品'}</div>
+              <div className="favorites-thumb-row">
                 {outfitItems.length > 0 ? outfitItems.map((item) => (
-                  <div key={item.id} style={styles.thumbCard}>
+                  <div key={item.id} className="favorites-thumb-card">
                     <Image
                       src={item.processedImage}
                       width={64}
                       height={64}
                       fit="cover"
-                      style={styles.thumbImage}
+                      className="favorites-thumb-image"
                     />
-                    <span style={styles.thumbName}>{item.name}</span>
-                    <Tag fill="outline" style={styles.thumbCategoryTag}>
+                    <span className="favorites-thumb-name">{item.name}</span>
+                    <Tag fill="outline" className="favorites-thumb-category-tag">
                       {categoryLabel[item.category]}
                     </Tag>
                   </div>
                 )) : (
-                  <span style={styles.detailDate}>{'单品已从衣柜移除'}</span>
+                  <span className="favorites-detail-date">{'单品已从衣柜移除'}</span>
                 )}
               </div>
             </div>
@@ -174,16 +169,12 @@ export function FavoritesList() {
   /* ============ 加载态 / 错误态 ============ */
   if (loading) {
     return (
-      <div style={styles.page}>
-        <div style={styles.header}>
-          <div style={styles.headerSpacer} />
-          <span style={styles.headerTitle}>{'穿搭'}</span>
-          <div style={styles.headerSpacer} />
-        </div>
-        <div style={styles.stateWrap}>
+      <div className="favorites-page">
+        <PageHeader title="喜欢" />
+        {showLoading && <div className="favorites-state">
           <SpinLoading color="primary" />
-          <span style={styles.stateHint}>{'加载中...'}</span>
-        </div>
+          <span className="favorites-state-hint">{'加载中…'}</span>
+        </div>}
         <SafeArea position="bottom" />
       </div>
     )
@@ -191,15 +182,11 @@ export function FavoritesList() {
 
   if (listError) {
     return (
-      <div style={styles.page}>
-        <div style={styles.header}>
-          <div style={styles.headerSpacer} />
-          <span style={styles.headerTitle}>{'穿搭'}</span>
-          <div style={styles.headerSpacer} />
-        </div>
-        <div style={styles.stateWrap}>
+      <div className="favorites-page">
+        <PageHeader title="喜欢" />
+        <div className="favorites-state">
           <ErrorBlock status="default" title="加载失败" description={listError} />
-          <Button color="primary" size="small" onClick={() => void fetchFavorites()} style={{ marginTop: 12 }}>
+          <Button color="primary" size="small" onClick={() => void fetchFavorites()} className="favorites-state-retry">
             {'重试'}
           </Button>
         </div>
@@ -211,26 +198,10 @@ export function FavoritesList() {
   /* ============ 空状态 ============ */
   if (favorites.length === 0) {
     return (
-      <div style={styles.page}>
-        <div style={styles.header}>
-          <button style={styles.backBtn} onClick={() => navigate(-1)}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="15 18 9 12 15 6" />
-            </svg>
-          </button>
-          <span style={styles.headerTitle}>{'穿搭'}</span>
-          <div style={styles.headerSpacer} />
-        </div>
-        <div style={styles.emptyContainer}>
-          <Empty description={'还没有收藏的搭配'} imageStyle={styles.emptyImage} />
-          <Button
-            color="primary"
-            size="large"
-            onClick={() => navigate('/style')}
-            style={styles.emptyCta}
-          >
-            {'去搭配页保存第一套吧'}
-          </Button>
+      <div className="favorites-page">
+        <PageHeader title="喜欢" />
+        <div className="favorites-empty-container">
+          <EmptyState title="还没有收藏的搭配" description="在搭配页保存后，会出现在这里。" icon="heart" action={<UiButton block variant="secondary" onClick={() => navigate('/style')}>去搭配</UiButton>} />
         </div>
         <SafeArea position="bottom" />
       </div>
@@ -239,26 +210,23 @@ export function FavoritesList() {
 
   /* ============ 主视图 ============ */
   return (
-    <div style={styles.page}>
-      <div style={styles.header}>
-        <div style={styles.headerSpacer} />
-        <span style={styles.headerTitle}>{'穿搭'}</span>
-        <div style={styles.headerSpacer} />
-      </div>
+    <div className="favorites-page">
+      <PageHeader title="喜欢" />
 
       {detailLoading && (
-        <div style={styles.overlayLoading}>
+        <div className="favorites-overlay-loading">
           <SpinLoading color="primary" />
         </div>
       )}
 
-      <div style={styles.scrollWrap}>
+      <div className="favorites-scroll-wrap">
         <PullToRefresh onRefresh={handleRefresh}>
-          <div style={styles.gridContainer}>
+          <div className="favorites-grid-container">
           {favorites.map((fav) => (
-            <div
+            <button
+              type="button"
               key={fav.id}
-              style={styles.gridCard}
+              className="favorites-grid-card"
               onClick={() => void handleSelectFavorite(fav)}
             >
               {fav.screenshotPath ? (
@@ -267,20 +235,17 @@ export function FavoritesList() {
                   width="100%"
                   height={260}
                   fit="contain"
-                  style={{ ...styles.gridImage, background: '#fafafa' }}
+                  className="favorites-grid-image"
                 />
               ) : (
-                <div style={styles.gridPlaceholder}>
-                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M12 2a3 3 0 0 0-3 3c0 1.1.6 2.1 1.5 2.6L12 9l1.5-1.4A3 3 0 0 0 12 2z" />
-                    <path d="M3.5 15.5L12 9l8.5 6.5a1.5 1.5 0 0 1-1 2.5H4.5a1.5 1.5 0 0 1-1-2.5z" />
-                  </svg>
+                <div className="favorites-grid-placeholder">
+                  <Icon name="hanger" size={30} />
                 </div>
               )}
-              <div style={styles.gridFooter}>
-                <span style={styles.gridDate}>{formatDate(fav.createdAt)}</span>
+              <div className="favorites-grid-footer">
+                <span className="favorites-grid-date">{formatDate(fav.createdAt)}</span>
               </div>
-            </div>
+            </button>
           ))}
         </div>
       </PullToRefresh>
@@ -289,192 +254,4 @@ export function FavoritesList() {
       <SafeArea position="bottom" />
     </div>
   )
-}
-
-/* -------------------------------------------------- */
-/*  Styles                                            */
-/* -------------------------------------------------- */
-
-const styles: Record<string, React.CSSProperties> = {
-  page: {
-    display: 'flex',
-    flexDirection: 'column',
-    height: '100%',
-    background: 'var(--adm-color-background, #f5f5f5)',
-    position: 'relative',
-  },
-  /* Header — identical structure to styling page */
-  header: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: '12px 20px 0',
-    flexShrink: 0,
-    background: '#fff',
-  },
-  headerSpacer: {
-    width: 80,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: 700,
-    color: '#000',
-    letterSpacing: '-0.3px',
-  },
-  backBtn: {
-    width: 80,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    border: 'none',
-    background: 'none',
-    padding: 0,
-    cursor: 'pointer',
-    color: '#000',
-  },
-  emptyContainer: {
-    flex: 1,
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 32,
-    gap: 16,
-  },
-  emptyImage: {
-    height: 120,
-  },
-  emptyCta: {
-    minHeight: 44,
-    borderRadius: 8,
-    minWidth: 200,
-  },
-  stateWrap: {
-    flex: 1,
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 32,
-    gap: 12,
-  },
-  stateHint: {
-    fontSize: 13,
-    color: '#999',
-  },
-  overlayLoading: {
-    position: 'absolute',
-    inset: 0,
-    background: 'rgba(255,255,255,0.5)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 10,
-  },
-  scrollWrap: {
-    flex: 1,
-    overflowY: 'auto',
-    WebkitOverflowScrolling: 'touch',
-  },
-  gridContainer: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    gap: 12,
-    padding: '12px 12px 80px',
-  },
-  gridCard: {
-    borderRadius: 12,
-    overflow: 'hidden',
-    background: 'var(--adm-color-background, #fff)',
-    border: '1px solid var(--adm-color-border, #eee)',
-    cursor: 'pointer',
-  },
-  gridImage: {
-    display: 'block',
-  },
-  gridPlaceholder: {
-    width: '100%',
-    height: 180,
-    background: '#f5f5f5',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  gridFooter: {
-    padding: '8px 10px',
-  },
-  gridDate: {
-    fontSize: 12,
-    color: 'var(--adm-color-weak, #999)',
-  },
-  detailScroll: {
-    flex: 1,
-    overflowY: 'auto',
-    WebkitOverflowScrolling: 'touch',
-  },
-  detailImage: {
-    display: 'block',
-  },
-  detailBody: {
-    padding: 16,
-  },
-  detailMeta: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 12,
-    marginBottom: 16,
-  },
-  sourceTag: {
-    fontSize: 12,
-  },
-  detailDate: {
-    fontSize: 13,
-    color: 'var(--adm-color-weak, #999)',
-  },
-  reasonBlock: {
-    background: 'var(--adm-color-fill-content, #f9f9f9)',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 16,
-  },
-  reasonText: {
-    fontSize: 14,
-    lineHeight: '22px',
-    color: 'var(--adm-color-text, #333)',
-    margin: 0,
-  },
-  itemThumbnails: {
-    marginTop: 8,
-  },
-  thumbLabel: {
-    fontSize: 14,
-    fontWeight: 600,
-    color: 'var(--adm-color-text, #333)',
-    marginBottom: 12,
-  },
-  thumbRow: {
-    display: 'flex',
-    gap: 12,
-  },
-  thumbCard: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: 4,
-  },
-  thumbImage: {
-    borderRadius: 8,
-  },
-  thumbName: {
-    fontSize: 11,
-    color: 'var(--adm-color-text, #333)',
-    textAlign: 'center',
-    maxWidth: 64,
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap' as const,
-  },
-  thumbCategoryTag: {
-    fontSize: 10,
-  },
 }

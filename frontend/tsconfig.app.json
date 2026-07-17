@@ -13,6 +13,9 @@
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",
+    "paths": {
+      "@moda/ui": ["./src/ui/index.ts"]
+    },
     "noEmit": true,
     "jsx": "react-jsx",
 
@@ -22,5 +25,6 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx", "src/test"]
 }

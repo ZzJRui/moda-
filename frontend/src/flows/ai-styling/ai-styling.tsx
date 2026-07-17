@@ -7,7 +7,6 @@ import {
   SpinLoading,
 } from 'antd-mobile'
 import type { SwiperRef } from 'antd-mobile/es/components/swiper'
-import html2canvas from 'html2canvas'
 import { useNavigate } from 'react-router-dom'
 import type { ClothingCategory, AIRecommendation, ClothingItem } from '../shared/types'
 import { listClothes } from '../../api/clothes'
@@ -16,7 +15,10 @@ import { createFavorite } from '../../api/favorites'
 import { ApiError } from '../../api/errors'
 import { ClothingCarousel } from './ClothingCarousel'
 import { StylingChat, CHAT_LAYOUT_ID } from './StylingChat'
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
+import { Button as ModaButton, PageHeader } from '@moda/ui'
+import { useDelayedBusy } from '../shared/useDelayedBusy'
+import './ai-styling.css'
 
 /* -------------------------------------------------- */
 /*  Helpers                                           */
@@ -29,24 +31,6 @@ const categoryLabel: Record<ClothingCategory, string> = {
 }
 
 /* -------------------------------------------------- */
-/*  Slot machine keyframes                             */
-/* -------------------------------------------------- */
-
-const SLOT_KEYFRAMES = `
-@keyframes slotGlow {
-  0%   { box-shadow: 0 0 0 0 rgba(22,119,255, 0.3); }
-  50%  { box-shadow: 0 0 12px 4px rgba(22,119,255, 0.15); }
-  100% { box-shadow: 0 0 0 0 rgba(22,119,255, 0); }
-}
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(16px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.styling-scroll { scrollbar-width: none; -ms-overflow-style: none; }
-.styling-scroll::-webkit-scrollbar { display: none; }
-`
-
-/* -------------------------------------------------- */
 /*  Sub-tab type                                       */
 /* -------------------------------------------------- */
 
@@ -56,6 +40,7 @@ const SLOT_KEYFRAMES = `
 
 export function StylingHome() {
   const navigate = useNavigate()
+  const shouldReduceMotion = useReducedMotion() ?? false
 
   const [activeChat, setActiveChat] = useState(false)
   const [recommendation, setRecommendation] = useState<AIRecommendation | null>(null)
@@ -67,6 +52,7 @@ export function StylingHome() {
   const [items, setItems] = useState<ClothingItem[]>([])
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
+  const showLoading = useDelayedBusy(loading)
 
   const topRef = useRef<SwiperRef>(null)
   const bottomRef = useRef<SwiperRef>(null)
@@ -208,7 +194,7 @@ export function StylingHome() {
         reasonEl.style.cssText = [
           'margin-top:6px',
           'padding:10px 12px',
-          'background:#f5f7ff',
+          'background:#f5f5f5',
           'border-radius:12px',
           'font-size:14px',
           'line-height:1.6',
@@ -234,6 +220,7 @@ export function StylingHome() {
           ),
         )
 
+        const { default: html2canvas } = await import('html2canvas')
         canvas = await html2canvas(mirror, {
           backgroundColor: '#ffffff',
           useCORS: true,
@@ -272,40 +259,37 @@ export function StylingHome() {
   )
 
   return (
-    <div style={S.page}>
-      <style>{SLOT_KEYFRAMES}</style>
-
-      {/* === Header === */}
-      <div style={S.header}>
-        <div style={S.headerSpacer} />
-        <span style={S.headerTitle}>{'搭配'}</span>
-        <div style={S.headerRight}>
-          <button
-            style={{ ...S.saveBtn, ...(canSave ? S.saveBtnActive : {}) }}
-            onClick={canSave && !isSaving ? handleSave : undefined}
+    <div className="styling-page">
+      <PageHeader
+        title="搭配"
+        action={
+          <ModaButton
+            size="sm"
+            variant={canSave ? 'primary' : 'secondary'}
+            onClick={() => void handleSave()}
             disabled={!canSave || isSaving}
           >
-            {isSaving ? '保存中...' : '保存'}
-          </button>
-        </div>
-      </div>
+            {isSaving ? '保存中…' : '保存'}
+          </ModaButton>
+        }
+      />
 
       {/* === Main Content === */}
-      <div ref={scrollAreaRef} style={S.scrollArea} className="styling-scroll">
-        {loading ? (
-          <div style={S.loadingWrap}>
+      <div ref={scrollAreaRef} className="styling-page__scroll styling-scroll">
+        {loading ? (showLoading ? (
+          <div className="styling-page__state">
             <SpinLoading color="primary" />
-            <p style={S.loadingText}>{'加载中...'}</p>
+            <p className="styling-page__state-text">{'加载中…'}</p>
           </div>
-        ) : loadError ? (
-          <div style={S.loadingWrap}>
+        ) : null) : loadError ? (
+          <div className="styling-page__state">
             <ErrorBlock status="default" title="加载失败" description={loadError} />
-            <Button color="primary" size="small" onClick={() => void fetchItems()} style={{ marginTop: 12 }}>
+            <Button color="primary" size="small" onClick={() => void fetchItems()}>
               {'重试'}
             </Button>
           </div>
         ) : (
-          <div ref={captureRef} style={S.captureWrap}>
+          <div ref={captureRef} className="styling-page__capture">
             <ClothingCarousel
               ref={topRef}
               items={topItems}
@@ -332,19 +316,21 @@ export function StylingHome() {
       </div>
 
       {/* === AI Chat FAB (layoutId shared with StylingChat) === */}
-      <motion.div
-        layoutId={CHAT_LAYOUT_ID}
-        style={S.fab}
+      <motion.button
+        type="button"
+        layoutId={shouldReduceMotion ? undefined : CHAT_LAYOUT_ID}
+        className="styling-page__ai-fab"
         onClick={() => !activeChat && setActiveChat(true)}
+        aria-label="打开 AI 搭配助手"
       >
         <motion.span
-          style={S.fabIcon}
+          className="styling-page__ai-fab-label"
           animate={{ opacity: activeChat ? 0 : 1 }}
           transition={{ duration: 0.15 }}
         >
           {'帮你搭'}
         </motion.span>
-      </motion.div>
+      </motion.button>
 
       {/* === AI Chat Overlay === */}
       <StylingChat
@@ -355,146 +341,17 @@ export function StylingHome() {
 
       {/* === Animating overlay === */}
       {isAnimating && (
-        <div style={S.animOverlay}>
-          <div style={S.animSpinner}>
-            <div style={S.animDot} />
-            <div style={{ ...S.animDot, animationDelay: '0.2s' }} />
-            <div style={{ ...S.animDot, animationDelay: '0.4s' }} />
+        <div className="styling-page__anim-overlay">
+          <div className="styling-page__anim-spinner">
+            <div className="moda-styling-dot" />
+            <div className="moda-styling-dot moda-styling-dot--delayed-1" />
+            <div className="moda-styling-dot moda-styling-dot--delayed-2" />
           </div>
-          <p style={S.animText}>{'AI 正在为您挑选搭配...'}</p>
+          <p className="styling-page__anim-text">{'AI 正在为您挑选搭配…'}</p>
         </div>
       )}
 
       <SafeArea position="bottom" />
     </div>
   )
-}
-
-/* -------------------------------------------------- */
-/*  Styles                                             */
-/* -------------------------------------------------- */
-
-const S: Record<string, React.CSSProperties> = {
-  page: {
-    display: 'flex',
-    flexDirection: 'column',
-    height: '100%',
-    background: '#fff',
-    position: 'relative',
-    overflow: 'hidden',
-  },
-  /* Header */
-  header: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: '12px 20px 0',
-    flexShrink: 0,
-  },
-  headerSpacer: {
-    width: 80,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: 700,
-    color: '#000',
-    letterSpacing: '-0.3px',
-  },
-  headerRight: {
-    width: 80,
-    display: 'flex',
-    justifyContent: 'flex-end',
-  },
-  saveBtn: {
-    border: 'none',
-    background: '#e8e8e8',
-    color: '#bbb',
-    fontSize: 13,
-    fontWeight: 500,
-    padding: '6px 14px',
-    borderRadius: 16,
-    cursor: 'not-allowed',
-  },
-  saveBtnActive: {
-    background: '#000',
-    color: '#fff',
-    cursor: 'pointer',
-  },
-  /* Scroll area */
-  scrollArea: {
-    flex: 1,
-    overflowY: 'auto',
-    padding: 0,
-    WebkitOverflowScrolling: 'touch',
-  },
-  captureWrap: {
-    background: '#fff',
-    padding: '32px 0 8px',
-  },
-  /* Loading / error */
-  loadingWrap: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '48px 20px',
-    color: '#666',
-  },
-  loadingText: {
-    marginTop: 12,
-    fontSize: 13,
-    color: '#999',
-  },
-  /* FAB */
-  fab: {
-    position: 'absolute',
-    right: 20,
-    bottom: 80,
-    height: 44,
-    paddingLeft: 18,
-    paddingRight: 18,
-    borderRadius: 22,
-    background: '#000',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    cursor: 'pointer',
-    boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
-    zIndex: 10,
-  },
-  fabIcon: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: 600,
-    letterSpacing: '0.5px',
-    whiteSpace: 'nowrap' as const,
-  },
-  /* Animation overlay */
-  animOverlay: {
-    position: 'absolute',
-    inset: 0,
-    background: 'rgba(255,255,255,0.85)',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 20,
-  },
-  animSpinner: {
-    display: 'flex',
-    gap: 8,
-    marginBottom: 12,
-  },
-  animDot: {
-    width: 8,
-    height: 8,
-    borderRadius: '50%',
-    background: '#000',
-    animation: 'fadeInUp 0.6s ease-in-out infinite alternate',
-  },
-  animText: {
-    fontSize: 14,
-    color: '#333',
-    fontWeight: 500,
-  },
 }

@@ -1,0 +1,21 @@
+.app-shell { width: 100%; height: 100dvh; display: flex; align-items: center; justify-content: center; background: var(--moda-canvas); }
+.phone-frame { width: 100%; max-width: 430px; height: 100%; max-height: 932px; display: flex; flex-direction: column; position: relative; overflow: hidden; background: var(--moda-surface); box-shadow: var(--moda-shadow-raised); }
+.moda-brand-bar { display: flex; flex-shrink: 0; align-items: center; gap: 8px; min-height: 52px; padding: 10px 20px 4px; }
+.moda-brand-bar img { width: 28px; height: 28px; border-radius: 8px; object-fit: contain; filter: grayscale(1); }
+.moda-brand-bar__name { color: var(--moda-ink); font-size: 16px; font-weight: 700; letter-spacing: -.02em; }
+.moda-route-area { position: relative; flex: 1; min-height: 0; overflow: hidden; }
+.moda-route-loading { display: grid; height: 100%; place-items: center; color: var(--moda-muted); font-size: 13px; }
+.moda-community-page { display: grid; height: 100%; place-items: center; background: var(--moda-surface); }
+.app-bottom-nav { position: relative; z-index: 30; flex-shrink: 0; min-height: 68px; border-top: 1px solid var(--moda-line); background: rgb(255 255 255 / 94%); }
+.app-bottom-nav__items { display: flex; height: 68px; align-items: center; justify-content: space-around; padding: 0 6px; }
+.app-bottom-nav__center-gap { width: 106px; flex-shrink: 0; }
+.app-bottom-nav__link { display: flex; flex: 1; min-width: 0; min-height: 44px; align-items: center; justify-content: center; gap: 3px; padding: 4px; border-radius: 12px; color: var(--moda-subtle); text-decoration: none; font-size: 10px; font-weight: 600; transition: color var(--moda-duration-press) ease; }
+.app-bottom-nav__link.is-active { color: var(--moda-ink); }
+.app-upload-cta { position: absolute; left: 50%; top: -18px; display: inline-flex; width: 106px; height: 56px; align-items: center; justify-content: center; gap: 6px; padding: 0 14px; border: 0; border-radius: 28px; background: var(--moda-ink); color: var(--moda-surface); box-shadow: var(--moda-shadow-floating); transform: translateX(-50%); font-size: 13px; font-weight: 700; cursor: pointer; transition: transform var(--moda-duration-press) var(--moda-ease-out); }
+.app-upload-cta__icon { display: inline-flex; transition: transform var(--moda-duration-popover) var(--moda-ease-out); }
+.app-upload-cta[aria-expanded="true"] .app-upload-cta__icon { transform: rotate(45deg); }
+.app-upload-cta:active { transform: translateX(-50%) scale(.97); }
+.app-upload-cta:focus-visible, .app-bottom-nav__link:focus-visible { outline: 2px solid var(--moda-focus); outline-offset: 3px; }
+.moda-community-page__placeholder { padding: 24px; text-align: center; }
+@media (hover: hover) and (pointer: fine) { .app-bottom-nav__link:hover { color: var(--moda-ink); } }
+@media (prefers-reduced-motion: reduce) { .app-upload-cta, .app-upload-cta__icon { transition: none; } }

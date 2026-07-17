@@ -1,91 +1,30 @@
-import { motion, AnimatePresence } from 'framer-motion'
-
-/* -------------------------------------------------- */
-/*  Types                                              */
-/* -------------------------------------------------- */
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import './upload-feedback.css'
 
 export type UploadStatus = 'uploading' | 'success' | 'error'
-
-export interface UploadCapsuleProps {
-  visible: boolean
-  progress: number      // 0 – 100
-  status: UploadStatus
-  errorMsg?: string
-  onDismiss?: () => void
-}
-
-/* -------------------------------------------------- */
-/*  Component                                          */
-/* -------------------------------------------------- */
+export interface UploadCapsuleProps { visible: boolean; progress: number; status: UploadStatus; errorMsg?: string; onDismiss?: () => void }
 
 export function UploadCapsule({ visible, progress, status, errorMsg, onDismiss }: UploadCapsuleProps) {
-  const label =
-    status === 'uploading'
-      ? '图片正在上传中'
-      : status === 'success'
-        ? '上传成功'
-        : errorMsg ?? '上传失败'
-
-  const barColor =
-    status === 'error' ? '#ff4d4f' : status === 'success' ? '#52c41a' : '#000'
-
+  const reduceMotion = useReducedMotion() ?? false
+  const label = status === 'uploading' ? '正在上传并识别' : status === 'success' ? '上传成功' : errorMsg ?? '上传失败'
+  const statusText = status === 'uploading' ? `${Math.round(progress)}%` : status === 'success' ? '完成' : '点按关闭'
   return (
     <AnimatePresence>
       {visible && (
-        <motion.div
-          style={CS.capsule}
-          initial={{ y: -70, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: -70, opacity: 0 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+        <motion.button
+          type="button"
+          className="upload-capsule"
+          disabled={status === 'uploading' || !onDismiss}
+          initial={{ transform: reduceMotion ? 'none' : 'translateY(-16px)', opacity: 0 }}
+          animate={{ transform: 'translateY(0)', opacity: 1 }}
+          exit={{ transform: reduceMotion ? 'none' : 'translateY(-12px)', opacity: 0 }}
+          transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
           onClick={status !== 'uploading' ? onDismiss : undefined}
         >
-          <span style={CS.text}>{label}</span>
-          <div style={CS.track}>
-            <motion.div
-              style={{ ...CS.bar, background: barColor, width: `${Math.min(progress, 100)}%` }}
-              transition={{ duration: 0.25, ease: 'easeOut' }}
-            />
-          </div>
-        </motion.div>
+          <span className="upload-capsule__top"><span className="upload-capsule__label">{label}</span><span className="upload-capsule__status">{statusText}</span></span>
+          <span className="upload-capsule__track"><motion.span className="upload-capsule__bar" animate={{ transform: `scaleX(${Math.min(progress, 100) / 100})` }} transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }} /></span>
+        </motion.button>
       )}
     </AnimatePresence>
   )
-}
-
-/* -------------------------------------------------- */
-/*  Styles                                             */
-/* -------------------------------------------------- */
-
-const CS: Record<string, React.CSSProperties> = {
-  capsule: {
-    position: 'absolute',
-    top: 12,
-    left: 20,
-    right: 20,
-    background: '#fff',
-    borderRadius: 16,
-    padding: '10px 16px 8px',
-    boxShadow: '0 4px 20px rgba(0,0,0,0.10)',
-    zIndex: 50,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 6,
-    cursor: 'pointer',
-  },
-  text: {
-    fontSize: 13,
-    fontWeight: 500,
-    color: '#333',
-  },
-  track: {
-    height: 3,
-    borderRadius: 2,
-    background: '#f0f0f0',
-    overflow: 'hidden',
-  },
-  bar: {
-    height: '100%',
-    borderRadius: 2,
-  },
 }

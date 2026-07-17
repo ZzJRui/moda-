@@ -1,0 +1,4 @@
+.ui-preview { height: 100%; overflow-y: auto; background: var(--moda-canvas); }
+.ui-preview__content { display: grid; gap: 20px; padding: 20px; }
+.ui-preview__surface { display: grid; gap: 12px; padding: 20px; }
+.ui-preview__icon-row { display: flex; gap: 8px; }
